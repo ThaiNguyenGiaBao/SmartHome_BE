@@ -5,6 +5,11 @@ class UserModel {
         const user = await db.query("SELECT * FROM \"user\" WHERE email = $1", [email]);
         return user.rows[0] || null;
     }
+
+    static async findUserByEmailOrUsername(emailOrUsername: string) {
+        const user = await db.query("SELECT * FROM \"user\" WHERE email = $1 OR username = $2", [emailOrUsername, emailOrUsername]);
+        return user.rows[0] || null;
+    }
     
     static async createUser({
         username,

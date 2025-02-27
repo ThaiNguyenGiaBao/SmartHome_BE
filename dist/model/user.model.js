@@ -21,6 +21,14 @@ class AccessModel {
             return user.rows[0];
         });
     }
+
+    static findUserByEmailOrUsername(emailOrUsername) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield initDatabase_1.default.query("SELECT * FROM users WHERE email = $1 OR name = $2", [emailOrUsername, emailOrUsername]);
+            return user.rows[0];
+        });
+    }
+
     static createUser(_a) {
         return __awaiter(this, arguments, void 0, function* ({ email, username, hashedPassword, avatarUrl }) {
             const newUserResult = yield initDatabase_1.default.query(`INSERT INTO users (email, name, password, avatarUrl) 
