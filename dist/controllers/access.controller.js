@@ -31,7 +31,10 @@ class AccessController {
     static SignIn(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("AccessController::SignIn", req.body);
-            const data = yield access_service_1.default.SignIn(req.body);
+            const data = yield access_service_1.default.SignIn(
+                emailOrUsername = req.body.emailOrUsername,
+                password = req.body.password
+            );
             res.cookie("token", data.accessToken, { httpOnly: true, secure: true, sameSite: "none" });
             return new successResponse_1.OK({
                 message: "User signed in successfully",

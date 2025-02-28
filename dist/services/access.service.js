@@ -33,7 +33,7 @@ class AccessService {
     static SignUp(_a) {
         return __awaiter(this, arguments, void 0, function* ({ email, username, password }) {
             if (!email || !username || !password) {
-                throw new errorRespone_1.BadRequestError("Email, username, password are required");
+                throw new errorRespone_1.BadRequestError("Email, username and password are required");
             }
             const usernameRegex = /^[a-zA-Z0-9_]+$/;
             if (!usernameRegex.test(username)) {
@@ -64,11 +64,11 @@ class AccessService {
         });
     }
     static SignIn(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ email, password }) {
-            if (!email || !password) {
-                throw new errorRespone_1.BadRequestError("Email and password are required");
+        return __awaiter(this, arguments, void 0, function* ({ emailOrUsername, password }) {
+            if (!emailOrUsername || !password) {
+                throw new errorRespone_1.BadRequestError("Email (or username) and password are required");
             }
-            const user = yield user_model_1.default.findUserByEmail(email);
+            const user = yield user_model_1.default.findUserByEmailOrUsername(emailOrUsername);
             if (!user) {
                 throw new errorRespone_1.NotFoundError("User not found");
             }
