@@ -3,28 +3,16 @@ import db from "../dbs/initDatabase";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import userModel from "../model/user.model";
+import userModel from "../model/user/user.model";
 dotenv.config();
 
+import { User } from "../model/user/user";
+
 class AccessService {
-    
-    static async SignUp({
-        username,
-        email,
-        password,
-        phoneNum,
-        dob,
-    }: {
-        username: string;
-        email: string;
-        password: string;
-        phoneNum?: string;
-        dob?: string;
-    }) {
+    static async SignUp({ username, email, password }: User) {
         if (!email || !username || !password) {
             throw new BadRequestError("Email, username, password are required");
         }
-     
 
         // check if email is already used
         const user = await userModel.findUserByEmail(email);
@@ -38,9 +26,6 @@ class AccessService {
             username,
             email,
             password: hashedPassword,
-            role: "student",
-            phoneNum,
-            dob,
             avatarUrl
         });
 

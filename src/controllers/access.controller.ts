@@ -7,15 +7,15 @@ class AccessController {
     static async SignUp(req: Request, res: Response) {
         console.log("AccessController::SignUp", req.body);
 
-        const { username, email, password, phoneNum, dob, avatarUrl } = req.body;
+        const { username, email, password } = req.body;
+        
+
         return new Created({
             message: "User created successfully",
             data: await AccessService.SignUp({
                 username,
                 email,
-                password,
-                phoneNum,
-                dob,
+                password
             })
         }).send(res);
     }

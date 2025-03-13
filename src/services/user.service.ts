@@ -1,7 +1,7 @@
 import { BadRequestError, ForbiddenError, NotFoundError } from "../helper/errorRespone";
 
 import { checkUUID } from "../utils";
-import UserModel from "../model/user.model";
+import UserModel from "../model/user/user.model";
 
 class UserService {
     static async getUser(userId: string) {
@@ -21,7 +21,7 @@ class UserService {
     }
 
     static async getAllUsers({ page, limit }: { page: number; limit: number }) {
-        const users = await UserModel.getAllUsers({page, limit});
+        const users = await UserModel.getAllUsers({ page, limit });
         return users;
     }
 
@@ -35,7 +35,7 @@ class UserService {
             password,
             avatarUrl,
             phoneNum,
-            dob,
+            dob
         }: { email?: string; username?: string; password?: string; avatarUrl?: string; phoneNum?: string; dob?: string }
     ) {
         console.log("UpdateUserProfile::", userId, email, username, password, avatarUrl, phoneNum, dob);
@@ -52,9 +52,7 @@ class UserService {
             throw new NotFoundError("User not found");
         }
 
-
         // Prepare update query parts
-        
 
         const updatedUser = await UserModel.updateUser(userId, {
             email,
@@ -62,8 +60,7 @@ class UserService {
             password,
             avatarUrl,
             phoneNum,
-            dob,
-
+            dob
         });
         console.log("Updated user", updatedUser);
         return updatedUser;
@@ -88,8 +85,6 @@ class UserService {
         const deletedUser = await UserModel.deleteUser(userId);
         return deletedUser;
     }
-
-
 }
 
 export default UserService;
