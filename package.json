@@ -4,7 +4,8 @@
     "description": "",
     "main": "server.js",
     "scripts": {
-        "start": "nodemon src/server.ts",
+        "start": "node dist/server.js",
+        "dev": "nodemon src/server.ts",
         "format": "prettier '**/*.{ts,js,json}' --write",
         "lint": "eslint 'src/**/*.ts'",
         "build": "tsc",
