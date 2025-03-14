@@ -16,7 +16,17 @@ class DeviceService {
     }
 
     static async updateDeviceStateById(id: string, command: string) {
-        adafruitService.publish(id, command);
+        if (!checkUUID(id)) {
+            throw new BadRequestError("Invalid device id");
+        }
+
+        const device = await DeviceModel.getDeviceById(id);
+        //console.log("DeviceService::updateDeviceStateById", device);
+        if (!device) {
+            throw new NotFoundError("Device not found");
+        }
+
+        adafruitService.publish(device.feet, command);
     }
 
     // router.post("/", asyncHandler(DeviceController.createDevice));
@@ -25,12 +35,12 @@ class DeviceService {
             throw new ForbiddenError("user_id, name, type, feet are required");
         }
 
-        // const feedData: Feed = {
-        //     name: name,
-        //     description: "This is a feed for " + name
-        // };
+        const feedData: Feed = {
+            name: feet,
+            description: "This is a feed for " + name
+        };
 
-        // const feed = await adafruitService.createFeed(feedData);
+        const feed = await adafruitService.createFeed(feedData);
 
         const blockData = {
             name: name,

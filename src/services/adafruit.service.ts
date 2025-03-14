@@ -72,13 +72,18 @@ export class AdafruitService {
             return;
         }
         const topic = `${this.username}/feeds/${feed}`;
-        this.client.publish(topic, message, (err?: Error) => {
-            if (err) {
-                console.error(`Publish error on topic ${topic}:`, err);
-            } else {
-                console.log(`Message "${message}" published to ${topic}`);
-            }
-        });
+        try {
+            this.client.publish(topic, message, (err?: any) => {
+                if (err) {
+                    console.error(`Publish error on topic ${topic}:`, err);
+                    throw new BadRequestError(err.response.data);
+                } else {
+                    console.log(`Message "${message}" published to ${topic}`);
+                }
+            });
+        } catch (error: any) {
+            throw error;
+        }
     }
 
     // Disconnect from the MQTT broker
