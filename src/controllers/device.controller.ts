@@ -5,12 +5,22 @@ import DeviceService from "../services/device.service";
 class DeviceController {
     // router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
     static async getDeviceStateById(req: Request, res: Response) {
-        console.log("DeviceController::getDeviceStateById", req.params.id);
+        console.log("DeviceController::getAllDeviceStateById", req.params.id);
         return new OK({
             message: "Device state fetched successfully",
             data: await DeviceService.getDeviceStateById(req.params.id)
         }).send(res);
     }
+
+    // router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
+    static async getCurrentDeviceStateById(req: Request, res: Response) {
+        console.log("DeviceController::getCurrentDeviceStateById", req.params.id);
+        return new OK({
+            message: "Device state fetched successfully",
+            data: await DeviceService.getCurrentDeviceStateById(req.params.id)
+        }).send(res);
+    }
+
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static async updateDeviceStateById(req: Request, res: Response) {
         console.log("DeviceController::updateDeviceStateById", req.params.id, req.query.command);

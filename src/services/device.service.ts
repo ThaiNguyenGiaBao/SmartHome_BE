@@ -13,6 +13,40 @@ class DeviceService {
         if (!checkUUID(id)) {
             throw new BadRequestError("Invalid device id");
         }
+
+        const device = await DeviceModel.getDeviceById(id);
+        if (!device) {
+            throw new NotFoundError("Device not found");
+        }
+
+        const endpoint = `https://io.adafruit.com/api/v2/${adafruitService.username}/feeds/${device.feed}/data`;
+        const response = await axios.get(endpoint, {
+            headers: {
+                "X-AIO-Key": adafruitService.aioKey
+            }
+        });
+
+        return response.data;
+    }
+
+    static async getCurrentDeviceStateById(id: string) {
+        if (!checkUUID(id)) {
+            throw new BadRequestError("Invalid device id");
+        }
+
+        const device = await DeviceModel.getDeviceById(id);
+        if (!device) {
+            throw new NotFoundError("Device not found");
+        }
+
+        const endpoint = `https://io.adafruit.com/api/v2/${adafruitService.username}/feeds/${device.feed}/data/last`;
+        const response = await axios.get(endpoint, {
+            headers: {
+                "X-AIO-Key": adafruitService.aioKey
+            }
+        });
+
+        return response.data;
     }
 
     static async updateDeviceStateById(id: string, command: string) {
