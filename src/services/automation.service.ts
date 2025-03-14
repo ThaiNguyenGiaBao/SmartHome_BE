@@ -75,7 +75,9 @@ class AutomationService {
         
 
         const automation = await AutomationModel.updateAutomation(id, updates);
-
+        if (!automation) {
+            throw new NotFoundError("Automation not found");
+        }
         const device = await DeviceModel.getDeviceById(automation.deviceId);
         if (!device) {
             throw new NotFoundError("Device not found");
@@ -85,9 +87,7 @@ class AutomationService {
             throw new ForbiddenError("Cannot get automation for other user's device");
         }
 
-        if (!automation) {
-            throw new NotFoundError("Automation not found");
-        }
+        
         return automation;
     }
     // router.delete("/:id", asyncHandler(AutomationController.deleteAutomation));
