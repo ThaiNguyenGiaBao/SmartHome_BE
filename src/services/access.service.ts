@@ -32,12 +32,12 @@ class AccessService {
         return result;
     }
 
-    static async SignIn({ emailOrUsername, password }: { emailOrUsername: string; password: string }) {
-        if (!emailOrUsername || !password) {
+    static async SignIn({ email, password }: { email: string; password: string }) {
+        if (!email || !password) {
             throw new BadRequestError("Email and password are required");
         }
 
-        const user = await userModel.findUserByEmailOrUsername(emailOrUsername);
+        const user = await userModel.findUserByEmail(email);
         if (!user) {
             throw new NotFoundError("User not found");
         }

@@ -21,6 +21,7 @@ CREATE TABLE devices (
     type        VARCHAR(100) NOT NULL,
     status      device_status DEFAULT 'off',
     room        VARCHAR(100),
+    feet        VARCHAR(100) NOT NULL,
     CONSTRAINT fk_device_user
         FOREIGN KEY (user_id)
         REFERENCES users (id)
@@ -44,7 +45,7 @@ CREATE TABLE device_status_log (
 CREATE TABLE environmental_log (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     device_id   UUID NOT NULL,
-    value       DECIMAL(10, 2),
+    value       INT NOT NULL,
     timestamp   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_environmentallog_device
         FOREIGN KEY (device_id)
@@ -58,10 +59,10 @@ CREATE TABLE automation_scenarios (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     device_id   UUID NOT NULL,
     name        VARCHAR(100) NOT NULL,
-    interval    VARCHAR(50),
     low         INT NOT NULL,
     high        INT NOT NULL,
     description TEXT,
+    action      VARCHAR(100) NOT NULL,
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_automationscenarios_device

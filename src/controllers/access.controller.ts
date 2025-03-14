@@ -1,7 +1,6 @@
 import AccessService from "../services/access.service";
 import { Request, Response } from "express";
 import { OK, Created } from "../helper/successResponse";
-import { token } from "morgan";
 
 class AccessController {
     static async SignUp(req: Request, res: Response) {
