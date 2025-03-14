@@ -20,18 +20,22 @@ class UserController {
     static getUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("GetUserProfile::", req.params);
-            if (req.params.userId == "me") {
-                return new successResponse_1.Created({
-                    message: "Get user profile successfully",
-                    data: yield user_service_1.default.getUser(req.user.id)
-                }).send(res);
-            }
             if (req.user.id != req.params.userId && req.user.role != "admin") {
                 throw new errorRespone_1.ForbiddenError("You are not allowed to access this resource");
             }
-            return new successResponse_1.Created({
+            return new successResponse_1.SuccessResponse({
                 message: "Get user profile successfully",
                 data: yield user_service_1.default.getUser(req.params.userId)
+            }).send(res);
+        });
+    }
+    //router.get("/me", asyncHandler(UserController.getUser));
+    static getMe(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("GetMe::");
+            return new successResponse_1.SuccessResponse({
+                message: "Get user profile successfully",
+                data: yield user_service_1.default.getUser(req.user.id)
             }).send(res);
         });
     }
@@ -49,7 +53,7 @@ class UserController {
             }).send(res);
         });
     }
-    // router.patch("/:userId", asyncHandler(UserController.updateUser));
+    // router.patch("/update/:userId", asyncHandler(UserController.updateUser));
     static updateUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("UpdateUserProfile::", req.params, req.body);
@@ -62,7 +66,7 @@ class UserController {
             }).send(res);
         });
     }
-    // router.delete("/:userId", asyncHandler(UserController.deleteUser));
+    // // router.delete("/:userId", asyncHandler(UserController.deleteUser));
     static deleteUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("DeleteUserProfile::", req.params);
@@ -70,7 +74,7 @@ class UserController {
                 throw new errorRespone_1.ForbiddenError("You are not allowed to delete this resource");
             }
             return new successResponse_1.OK({
-                message: "Delete user profile successfully",
+                message: "Delete user successfully",
                 data: yield user_service_1.default.deleteUser(req.params.userId)
             }).send(res);
         });

@@ -18,12 +18,13 @@ class AccessController {
     static SignUp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("AccessController::SignUp", req.body);
+            const { username, email, password } = req.body;
             return new successResponse_1.Created({
                 message: "User created successfully",
                 data: yield access_service_1.default.SignUp({
-                    email: req.body.email,
-                    password: req.body.password,
-                    username: req.body.username
+                    username,
+                    email,
+                    password
                 })
             }).send(res);
         });
@@ -31,10 +32,7 @@ class AccessController {
     static SignIn(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("AccessController::SignIn", req.body);
-            const data = yield access_service_1.default.SignIn(
-                emailOrUsername = req.body.emailOrUsername,
-                password = req.body.password
-            );
+            const data = yield access_service_1.default.SignIn(req.body);
             res.cookie("token", data.accessToken, { httpOnly: true, secure: true, sameSite: "none" });
             return new successResponse_1.OK({
                 message: "User signed in successfully",

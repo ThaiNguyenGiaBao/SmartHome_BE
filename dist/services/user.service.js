@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const errorRespone_1 = require("../helper/errorRespone");
 const utils_1 = require("../utils");
-const user_model_1 = __importDefault(require("../model/user.model"));
+const user_model_1 = __importDefault(require("../model/user/user.model"));
 class UserService {
     static getUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -37,10 +37,10 @@ class UserService {
             return users;
         });
     }
-    // // router.patch("/:userId", asyncHandler(UserController.updateUser));
+    // // // router.patch("/:userId", asyncHandler(UserController.updateUser));
     static updateUser(userId_1, _a) {
-        return __awaiter(this, arguments, void 0, function* (userId, { email, username, password, avatarUrl, coinBalance }) {
-            console.log("UpdateUserProfile::", userId, email, username, password, avatarUrl, coinBalance);
+        return __awaiter(this, arguments, void 0, function* (userId, { email, username, password, avatarUrl, phoneNum, dob }) {
+            console.log("UpdateUserProfile::", userId, email, username, password, avatarUrl, phoneNum, dob);
             if (!userId) {
                 throw new errorRespone_1.BadRequestError("User Id is required");
             }
@@ -51,24 +51,20 @@ class UserService {
             if (!user) {
                 throw new errorRespone_1.NotFoundError("User not found");
             }
-            if (!(0, utils_1.checkUUID)(userId)) {
-                throw new errorRespone_1.BadRequestError("Invalid input syntax for type uuid");
-            }
             // Prepare update query parts
-            const updates = [];
-            const values = [];
             const updatedUser = yield user_model_1.default.updateUser(userId, {
                 email,
                 username,
                 password,
                 avatarUrl,
-                coinBalance
+                phoneNum,
+                dob
             });
             console.log("Updated user", updatedUser);
             return updatedUser;
         });
     }
-    // // router.delete("/:userId", asyncHandler(UserController.deleteUser));
+    // // // router.delete("/:userId", asyncHandler(UserController.deleteUser));
     static deleteUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!userId) {
@@ -83,20 +79,6 @@ class UserService {
             }
             const deletedUser = yield user_model_1.default.deleteUser(userId);
             return deletedUser;
-        });
-    }
-    static getUserBalance(userId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const user = yield user_model_1.default.findUserById(userId);
-            if (!user)
-                throw new errorRespone_1.NotFoundError("User not found");
-            return user.coinbalance;
-        });
-    }
-    static updateUserBalance(userId, value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const user = yield user_model_1.default.updateUser(userId, { coinBalance: value });
-            return user;
         });
     }
 }

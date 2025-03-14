@@ -10,13 +10,9 @@ let db;
 // Create a new pool instance
 try {
     db = new Pool({
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
+        connectionString: process.env.DATABASE_URL,
         ssl: {
-            rejectUnauthorized: false // Allows self-signed certificates, set to true in production for security
+            rejectUnauthorized: false // Required for Neon Tech
         }
     });
 }
@@ -29,8 +25,4 @@ db.connect()
     .catch((err) => {
     console.error("Connection error", err.stack);
 });
-setInterval(() => {
-    db.query("SELECT * FROM users");
-    console.log("Query DBS...");
-}, 60000);
 exports.default = db;

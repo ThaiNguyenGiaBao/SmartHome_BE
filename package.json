@@ -9,8 +9,7 @@
         "format": "prettier '**/*.{ts,js,json}' --write",
         "lint": "eslint 'src/**/*.ts'",
         "build": "tsc",
-        "commit": "tsc && git add . && git commit -m 'build' && git push",
-        "product": "node dist/server.js"
+        "commit": "tsc && git add . && git commit -m 'build' && git push"
     },
     "keywords": [],
     "author": "",
