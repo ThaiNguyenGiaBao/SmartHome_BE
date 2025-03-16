@@ -36,7 +36,7 @@ class AccessService {
         if (!email || !password) {
             throw new BadRequestError("Email and password are required");
         }
-
+        console.log("AccessService::SignIn", email);
         const user = await userModel.findUserByEmail(email);
         if (!user) {
             throw new NotFoundError("User not found");
