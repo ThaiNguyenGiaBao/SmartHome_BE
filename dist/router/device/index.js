@@ -15,5 +15,6 @@ router.patch("/:id", (0, utils_1.asyncHandler)(device_controller_1.default.updat
 router.delete("/:id", (0, utils_1.asyncHandler)(device_controller_1.default.deleteDevice));
 router.post("/", (0, utils_1.asyncHandler)(device_controller_1.default.createDevice));
 router.get("/state/:id", (0, utils_1.asyncHandler)(device_controller_1.default.getDeviceStateById));
+router.get("/state/current/:id", (0, utils_1.asyncHandler)(device_controller_1.default.getCurrentDeviceStateById));
 router.post("/control/:id", (0, utils_1.asyncHandler)(device_controller_1.default.updateDeviceStateById));
 exports.default = router;

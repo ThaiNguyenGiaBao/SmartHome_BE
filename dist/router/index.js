@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const access_1 = __importDefault(require("./access"));
 const user_1 = __importDefault(require("./user"));
 const device_1 = __importDefault(require("./device"));
+const automation_1 = __importDefault(require("./automation"));
 const router = express_1.default.Router();
 router.get("/", (req, res) => {
     res.json({ message: "Hello World" });
@@ -14,4 +15,5 @@ router.get("/", (req, res) => {
 router.use("/auth", access_1.default);
 router.use("/user", user_1.default);
 router.use("/device", device_1.default);
+router.use("/automation", automation_1.default);
 exports.default = router;

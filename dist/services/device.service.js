@@ -16,12 +16,42 @@ const errorRespone_1 = require("../helper/errorRespone");
 const utils_1 = require("../utils");
 const app_1 = require("../app");
 const device_model_1 = __importDefault(require("../model/device/device.model"));
+const axios_1 = __importDefault(require("axios"));
 class DeviceService {
     static getDeviceStateById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, utils_1.checkUUID)(id)) {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
+            const device = yield device_model_1.default.getDeviceById(id);
+            if (!device) {
+                throw new errorRespone_1.NotFoundError("Device not found");
+            }
+            const endpoint = `https://io.adafruit.com/api/v2/${app_1.adafruitService.username}/feeds/${device.feed}/data`;
+            const response = yield axios_1.default.get(endpoint, {
+                headers: {
+                    "X-AIO-Key": app_1.adafruitService.aioKey
+                }
+            });
+            return response.data;
+        });
+    }
+    static getCurrentDeviceStateById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(0, utils_1.checkUUID)(id)) {
+                throw new errorRespone_1.BadRequestError("Invalid device id");
+            }
+            const device = yield device_model_1.default.getDeviceById(id);
+            if (!device) {
+                throw new errorRespone_1.NotFoundError("Device not found");
+            }
+            const endpoint = `https://io.adafruit.com/api/v2/${app_1.adafruitService.username}/feeds/${device.feed}/data/last`;
+            const response = yield axios_1.default.get(endpoint, {
+                headers: {
+                    "X-AIO-Key": app_1.adafruitService.aioKey
+                }
+            });
+            return response.data;
         });
     }
     static updateDeviceStateById(id, command) {

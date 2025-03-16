@@ -18,10 +18,20 @@ class DeviceController {
     // router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
     static getDeviceStateById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("DeviceController::getDeviceStateById", req.params.id);
+            console.log("DeviceController::getAllDeviceStateById", req.params.id);
             return new successResponse_1.OK({
                 message: "Device state fetched successfully",
                 data: yield device_service_1.default.getDeviceStateById(req.params.id)
+            }).send(res);
+        });
+    }
+    // router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
+    static getCurrentDeviceStateById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("DeviceController::getCurrentDeviceStateById", req.params.id);
+            return new successResponse_1.OK({
+                message: "Device state fetched successfully",
+                data: yield device_service_1.default.getCurrentDeviceStateById(req.params.id)
             }).send(res);
         });
     }
