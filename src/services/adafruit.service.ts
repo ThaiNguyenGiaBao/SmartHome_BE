@@ -3,10 +3,14 @@ import dotenv from "dotenv";
 import axios from "axios";
 import { BadRequestError } from "../helper/errorRespone";
 import { BlockFeed, Block, Feed } from "../model/device/device";
+import EnvLogController from "../controllers/envLog.controller";
+import DeviceService from "./device.service";
+import e from "express";
+import { EventEmitter } from "events";
 
 dotenv.config();
 
-export class AdafruitService {
+export class AdafruitService extends EventEmitter {
     public username: string;
     public aioKey: string;
     private baseUrl: string;
@@ -14,6 +18,7 @@ export class AdafruitService {
     private dashboardId: string;
 
     constructor() {
+        super();
         this.username = process.env.ADAFRUIT_IO_USERNAME || "";
         this.aioKey = process.env.ADAFRUIT_IO_KEY || "";
         this.baseUrl = "mqtts://io.adafruit.com";
@@ -147,6 +152,54 @@ export class AdafruitService {
                 console.error("Error creating block:", error.response ? error.response.data : error.message);
                 throw new BadRequestError(error.response.data.error);
             });
+    }
+
+    public async pullEnvLogData() {
+        this.pollInterval = setInterval(async () => {
+            try {
+                // 1) Fetch all feeds
+                const feedsRes = await axios.get(
+                    `https://io.adafruit.com/api/v2/${this.username}/feeds`,
+                    { headers: { "X-AIO-Key": this.aioKey } }
+                );
+                // 2) For each feed, fetch the latest data
+                for (const feed of feedsRes.data) {
+                    const latest = feed.last_value;
+                    // 3) Find the device ID for this feed
+                    const deviceId = await DeviceService.getDeviceIdByFeed(feed.key);
+
+                    // 4) Log to DB 
+                    // (only if the value is a integer or float number string and not 0 or 1 (buttons))
+                    if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
+                        const EnvLogService = require("../services/envLog.service").default;
+    
+                        await EnvLogService.createLog({
+                            deviceId: deviceId.id,
+                            value: parseInt(latest, 10)
+                        });
+
+                        //5) Emit WebSocket event
+                        this.emit("newReading", {
+                            deviceId: deviceId.id,
+                            value: parseInt(latest, 10)
+                        });
+                    }
+                    
+                }
+                console.log("Data pulled successfully from all feeds.");
+            } catch (error: any) {
+                console.error("Error pulling data:", error.message);
+            }
+        }, 10000);
+    }
+
+    private pollInterval: NodeJS.Timeout | null = null;
+    public stopPullEnvLogData() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+            console.log("Stopped pulling environment data.");
+        }
     }
 }
 
