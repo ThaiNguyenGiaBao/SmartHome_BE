@@ -11,11 +11,13 @@ export class AdafruitService {
     public aioKey: string;
     private baseUrl: string;
     private client: mqtt.MqttClient | null;
+    private dashboardId: string;
 
     constructor() {
         this.username = process.env.ADAFRUIT_IO_USERNAME || "";
         this.aioKey = process.env.ADAFRUIT_IO_KEY || "";
         this.baseUrl = "mqtts://io.adafruit.com";
+        this.dashboardId = "dashboards";
         this.client = null;
     }
 
@@ -117,7 +119,7 @@ export class AdafruitService {
     }
 
     public async createBlock(blockData: any): Promise<any> {
-        const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/dashboards/welcome-dashboard/blocks`;
+        const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/${this.dashboardId}/welcome-dashboard/blocks`;
 
         return await axios
             .post(blockEndpoint, blockData, {

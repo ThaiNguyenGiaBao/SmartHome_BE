@@ -5,6 +5,7 @@ import EnvLogService from "../services/envLog.service";
 export default class EnvLogController {  
 
     static async createLog(req: Request, res: Response) {
+      console.log("EnvLogController::createLog::", req.body);
       const newLog = await EnvLogService.createLog(req.body);
       return new Created({
         message: "EnvLog created successfully",
@@ -13,6 +14,7 @@ export default class EnvLogController {
     }
   
     static async getLogById(req: Request, res: Response) {
+      console.log("EnvLogController::getLogById::", req.params);
       const { id } = req.params;
       const log = await EnvLogService.getLogById(id);
       return new OK({
@@ -22,6 +24,7 @@ export default class EnvLogController {
     }
   
     static async updateLog(req: Request, res: Response) {
+      console.log("EnvLogController::updateLog::", req.params, req.body);
       const { id } = req.params;
       const updatedLog = await EnvLogService.updateLog(id, req.body);
       return new OK({
@@ -39,6 +42,7 @@ export default class EnvLogController {
     }
   
     static async getAllLogs(req: Request, res: Response) {
+      console.log("EnvLogController::getAllLogs::");
       const logs = await EnvLogService.getAllLogs();
       return new OK({
         message: "All EnvLogs retrieved",
@@ -47,6 +51,7 @@ export default class EnvLogController {
     }
   
     static async getLogsByDeviceId(req: Request, res: Response) {
+      console.log("EnvLogController::getLogsByDeviceId::", req.params);
       const { deviceId } = req.params;
       const logs = await EnvLogService.getLogsByDeviceId(deviceId);
       return new OK({
