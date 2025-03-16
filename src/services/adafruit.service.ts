@@ -44,6 +44,17 @@ export class AdafruitService {
         });
     }
 
+    static async pullEnvLogData() {
+        setInterval(async () => {
+          // call the adafruit api to get the data 
+  
+          // save the data to the database
+          //this.createLog(data)
+    
+        }, 10000);
+      }
+  
+
     // Subscribe to a specific feed topic
     public subscribe(feed: string, messageHandler: (topic: string, message: string) => void): void {
         if (!this.client) {
