@@ -54,18 +54,6 @@ class UserModel {
             if (updates.password) {
                 updates.password = yield bcrypt_1.default.hash(updates.password, 10);
             }
-            // UPDATE "user"
-            // SET
-            //     username = COALESCE($1, username),
-            //     email = COALESCE($2, email),
-            //     password = COALESCE($3, password),
-            //     role = COALESCE($4, role),
-            //     phoneNum = COALESCE($5, phoneNum),
-            //     dob = COALESCE($6, dob),
-            //     avatarUrl = COALESCE($7, avatarUrl),
-            //     updatedAt = NOW()
-            // WHERE id = $8
-            // RETURNING *;
             values.push(id); // Push the user ID as the last parameter
             const sql = 'UPDATE "users" SET ' + fields.join(", ") + " WHERE id = $" + values.length + " RETURNING *";
             console.log(sql);

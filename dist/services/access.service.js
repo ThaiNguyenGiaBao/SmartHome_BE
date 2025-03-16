@@ -45,6 +45,7 @@ class AccessService {
             if (!email || !password) {
                 throw new errorRespone_1.BadRequestError("Email and password are required");
             }
+            console.log("AccessService::SignIn", email);
             const user = yield user_model_1.default.findUserByEmail(email);
             if (!user) {
                 throw new errorRespone_1.NotFoundError("User not found");
