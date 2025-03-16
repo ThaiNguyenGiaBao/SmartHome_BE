@@ -142,6 +142,14 @@ class DeviceService {
         }
         return device;
     }
+
+    static async getDeviceIdByFeed(feedId: string) {
+        const device = await DeviceModel.getDeviceIdByFeed(feedId);
+        if (!device) {
+            throw new NotFoundError("Device not found");
+        }
+        return device;
+    }
 }
 
 export default DeviceService;

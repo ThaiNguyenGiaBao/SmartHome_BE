@@ -11,6 +11,7 @@ export default class EnvLogModel {
     `;
     const values = [data.deviceId, data.value];
     const result = await db.query(text, values);
+    console.log("EnvLogModel::createLog::", result.rows[0]);
     return {
       id: result.rows[0].id,
       deviceId: result.rows[0].device_id,
