@@ -2,10 +2,8 @@ import * as mqtt from "mqtt";
 import dotenv from "dotenv";
 import axios from "axios";
 import { BadRequestError } from "../helper/errorRespone";
-import { BlockFeed, Block, Feed } from "../model/device/device";
-import EnvLogController from "../controllers/envLog.controller";
+import { Feed } from "../model/device/device";
 import DeviceService from "./device.service";
-import e from "express";
 import { EventEmitter } from "events";
 
 dotenv.config();
@@ -16,6 +14,7 @@ export class AdafruitService extends EventEmitter {
     private baseUrl: string;
     private client: mqtt.MqttClient | null;
     private dashboardId: string;
+    private messageHandlers: { [topic: string]: (topic: string, message: string) => void } = {};
 
     constructor() {
         super();
@@ -27,7 +26,7 @@ export class AdafruitService extends EventEmitter {
     }
 
     // Establishes connection with Adafruit IO using MQTT
-    public connect(): void {
+    public async connect(): Promise<void> {
         this.client = mqtt.connect(this.baseUrl, {
             username: this.username,
             password: this.aioKey
@@ -47,6 +46,16 @@ export class AdafruitService extends EventEmitter {
         this.client.on("close", () => {
             console.log("Disconnected from Adafruit IO MQTT");
         });
+
+        // subcribe to all current feeds
+        const feeds = await this.getAllFeeds();
+        if (!feeds.data) {
+            console.log("No feeds found.");
+            return;
+        }
+        for (const feed of feeds.data) {
+            this.subscribe(feed.key, (topic, message) => {});
+        }
     }
 
     static async pullEnvLogData() {
@@ -75,12 +84,20 @@ export class AdafruitService extends EventEmitter {
             }
         });
 
-        // Set up the message handler for this topic
-        this.client.on("message", (receivedTopic: string, message: Buffer) => {
-            if (receivedTopic === topic) {
-                messageHandler(receivedTopic, message.toString());
-            }
-        });
+        // If there are no listeners for the "message" event, add one
+        if(!this.client.listenerCount("message")) {
+            this.client.on("message", (receivedTopic: string, message: Buffer) => {
+                console.log(`Received message on topic ${receivedTopic}:`, message.toString());
+                if (this.messageHandlers[receivedTopic]) {
+                    this.messageHandlers[receivedTopic](receivedTopic, message.toString());
+                    this.emit("newReading", message.toString());
+                    // TODO: create proper message to send to the client
+                }
+            });
+        }
+        // Add the message handler for this topic
+        this.messageHandlers[topic] = messageHandler;
+        
     }
 
     // Publish a message to a specific feed topic
@@ -123,6 +140,10 @@ export class AdafruitService extends EventEmitter {
                 }
             });
             console.log("Feed created successfully:", response.data);
+            // automatically subscribe to the new feed
+            const feedKey = response.data.key;
+            this.subscribe(feedKey, (topic, message) => {});
+            console.log("Subscribed to new feed:", feedKey);
             return response.data;
         } catch (error: any) {
             console.error("Error creating feed:", error.message);
@@ -154,14 +175,27 @@ export class AdafruitService extends EventEmitter {
             });
     }
 
+    public async getAllFeeds(): Promise<any> {
+        return await axios.get(`https://io.adafruit.com/api/v2/${this.username}/feeds`, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+
+    public async getFeed(feedId: string): Promise<any> {
+        return await axios.get(`https://io.adafruit.com/api/v2/${this.username}/feeds/${feedId}`, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+
     public async pullEnvLogData() {
         this.pollInterval = setInterval(async () => {
             try {
                 // 1) Fetch all feeds
-                const feedsRes = await axios.get(
-                    `https://io.adafruit.com/api/v2/${this.username}/feeds`,
-                    { headers: { "X-AIO-Key": this.aioKey } }
-                );
+                const feedsRes = await this.getAllFeeds();
                 // 2) For each feed, fetch the latest data
                 for (const feed of feedsRes.data) {
                     const latest = feed.last_value;
@@ -169,20 +203,14 @@ export class AdafruitService extends EventEmitter {
                     const deviceId = await DeviceService.getDeviceIdByFeed(feed.key);
 
                     // 4) Log to DB 
-                    // (only if the value is a integer or float number string and not 0 or 1 (buttons))
+                    // TODO: LOG ONLY IF THE DEVICE TYPE IS "gauge"
                     if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
                         const EnvLogService = require("../services/envLog.service").default;
     
-                        await EnvLogService.createLog({
-                            deviceId: deviceId.id,
-                            value: parseInt(latest, 10)
-                        });
-
-                        //5) Emit WebSocket event
-                        this.emit("newReading", {
-                            deviceId: deviceId.id,
-                            value: parseInt(latest, 10)
-                        });
+                        // await EnvLogService.createLog({
+                        //     deviceId: deviceId.id,
+                        //     value: parseInt(latest, 10)
+                        // });
                     }
                     
                 }
