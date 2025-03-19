@@ -11,8 +11,8 @@ const server = app.listen(port, () => {
     console.log(`Environment: ${env}\nServer is running on port ${port}`);
 });
 
-adafruitService.pullEnvLogData();
-const io = new Server(server, {
+//adafruitService.pullEnvLogData();   // TEMPORARY TURNED OFF
+export const io = new Server(server, {
     cors: {
         origin: "*"
     }
@@ -27,6 +27,7 @@ io.on("connection", (socket) => {
 
 adafruitService.on("newReading", (data) => {
     io.emit("newReading", data);
+    console.log("New reading:", data);
 });
 
 
