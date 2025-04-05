@@ -55,5 +55,11 @@ class DeviceModel {
             return result.rows[0];
         });
     }
+    static getDeviceIdByFeed(feedId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const device = yield initDatabase_1.default.query("SELECT id FROM devices WHERE feet = $1", [feedId]);
+            return device.rows[0];
+        });
+    }
 }
 exports.default = DeviceModel;

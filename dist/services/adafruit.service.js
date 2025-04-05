@@ -40,31 +40,57 @@ const mqtt = __importStar(require("mqtt"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const axios_1 = __importDefault(require("axios"));
 const errorRespone_1 = require("../helper/errorRespone");
+const device_service_1 = __importDefault(require("./device.service"));
+const events_1 = require("events");
 dotenv_1.default.config();
-class AdafruitService {
+class AdafruitService extends events_1.EventEmitter {
     constructor() {
+        super();
+        this.messageHandlers = {};
+        this.pollInterval = null;
         this.username = process.env.ADAFRUIT_IO_USERNAME || "";
         this.aioKey = process.env.ADAFRUIT_IO_KEY || "";
         this.baseUrl = "mqtts://io.adafruit.com";
+        this.dashboardId = "dashboards";
         this.client = null;
     }
     // Establishes connection with Adafruit IO using MQTT
     connect() {
-        this.client = mqtt.connect(this.baseUrl, {
-            username: this.username,
-            password: this.aioKey
-        });
-        this.client.on("connect", () => {
-            console.log("Connected to Adafruit IO MQTT");
-        });
-        this.client.on("error", (error) => {
-            console.error("Connection error:", error);
-            if (this.client) {
-                this.client.end();
+        return __awaiter(this, void 0, void 0, function* () {
+            this.client = mqtt.connect(this.baseUrl, {
+                username: this.username,
+                password: this.aioKey
+            });
+            this.client.on("connect", () => {
+                console.log("Connected to Adafruit IO MQTT");
+            });
+            this.client.on("error", (error) => {
+                console.error("Connection error:", error);
+                if (this.client) {
+                    this.client.end();
+                }
+            });
+            this.client.on("close", () => {
+                console.log("Disconnected from Adafruit IO MQTT");
+            });
+            // subcribe to all current feeds
+            const feeds = yield this.getAllFeeds();
+            if (!feeds.data) {
+                console.log("No feeds found.");
+                return;
+            }
+            for (const feed of feeds.data) {
+                this.subscribe(feed.key, (topic, message) => { });
             }
         });
-        this.client.on("close", () => {
-            console.log("Disconnected from Adafruit IO MQTT");
+    }
+    static pullEnvLogData() {
+        return __awaiter(this, void 0, void 0, function* () {
+            setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                // call the adafruit api to get the data
+                // save the data to the database
+                //this.createLog(data)
+            }), 10000);
         });
     }
     // Subscribe to a specific feed topic
@@ -82,12 +108,19 @@ class AdafruitService {
                 console.log(`Subscribed to ${topic}`);
             }
         });
-        // Set up the message handler for this topic
-        this.client.on("message", (receivedTopic, message) => {
-            if (receivedTopic === topic) {
-                messageHandler(receivedTopic, message.toString());
-            }
-        });
+        // If there are no listeners for the "message" event, add one
+        if (!this.client.listenerCount("message")) {
+            this.client.on("message", (receivedTopic, message) => {
+                console.log(`Received message on topic ${receivedTopic}:`, message.toString());
+                if (this.messageHandlers[receivedTopic]) {
+                    this.messageHandlers[receivedTopic](receivedTopic, message.toString());
+                    this.emit("newReading", message.toString());
+                    // TODO: create proper message to send to the client
+                }
+            });
+        }
+        // Add the message handler for this topic
+        this.messageHandlers[topic] = messageHandler;
     }
     // Publish a message to a specific feed topic
     publish(feed, message) {
@@ -129,6 +162,10 @@ class AdafruitService {
                     }
                 });
                 console.log("Feed created successfully:", response.data);
+                // automatically subscribe to the new feed
+                const feedKey = response.data.key;
+                this.subscribe(feedKey, (topic, message) => { });
+                console.log("Subscribed to new feed:", feedKey);
                 return response.data;
             }
             catch (error) {
@@ -143,7 +180,7 @@ class AdafruitService {
     }
     createBlock(blockData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/dashboards/welcome-dashboard/blocks`;
+            const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/${this.dashboardId}/welcome-dashboard/blocks`;
             return yield axios_1.default
                 .post(blockEndpoint, blockData, {
                 headers: {
@@ -160,6 +197,60 @@ class AdafruitService {
                 throw new errorRespone_1.BadRequestError(error.response.data.error);
             });
         });
+    }
+    getAllFeeds() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield axios_1.default.get(`https://io.adafruit.com/api/v2/${this.username}/feeds`, {
+                headers: {
+                    "X-AIO-Key": this.aioKey
+                }
+            });
+        });
+    }
+    getFeed(feedId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield axios_1.default.get(`https://io.adafruit.com/api/v2/${this.username}/feeds/${feedId}`, {
+                headers: {
+                    "X-AIO-Key": this.aioKey
+                }
+            });
+        });
+    }
+    pullEnvLogData() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.pollInterval = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    // 1) Fetch all feeds
+                    const feedsRes = yield this.getAllFeeds();
+                    // 2) For each feed, fetch the latest data
+                    for (const feed of feedsRes.data) {
+                        const latest = feed.last_value;
+                        // 3) Find the device ID for this feed
+                        const deviceId = yield device_service_1.default.getDeviceIdByFeed(feed.key);
+                        // 4) Log to DB 
+                        // TODO: LOG ONLY IF THE DEVICE TYPE IS "gauge"
+                        if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
+                            const EnvLogService = require("../services/envLog.service").default;
+                            // await EnvLogService.createLog({
+                            //     deviceId: deviceId.id,
+                            //     value: parseInt(latest, 10)
+                            // });
+                        }
+                    }
+                    console.log("Data pulled successfully from all feeds.");
+                }
+                catch (error) {
+                    console.error("Error pulling data:", error.message);
+                }
+            }), 10000);
+        });
+    }
+    stopPullEnvLogData() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+            console.log("Stopped pulling environment data.");
+        }
     }
 }
 exports.AdafruitService = AdafruitService;

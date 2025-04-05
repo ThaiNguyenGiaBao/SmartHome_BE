@@ -23,6 +23,7 @@ class EnvLogModel {
     `;
             const values = [data.deviceId, data.value];
             const result = yield initDatabase_1.default.query(text, values);
+            console.log("EnvLogModel::createLog::", result.rows[0]);
             return {
                 id: result.rows[0].id,
                 deviceId: result.rows[0].device_id,

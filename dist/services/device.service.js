@@ -82,8 +82,8 @@ class DeviceService {
                 name: name,
                 description: "This is a block for " + name,
                 visual_type: type,
-                size_x: 5,
-                size_y: 5
+                size_x: 0,
+                size_y: 0
             };
             const block = yield app_1.adafruitService.createBlock(blockData);
             const device = yield device_model_1.default.createDevice({ user_id, name, type, status, room, feet });
@@ -137,6 +137,15 @@ class DeviceService {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
             const device = yield device_model_1.default.deleteDevice(id);
+            if (!device) {
+                throw new errorRespone_1.NotFoundError("Device not found");
+            }
+            return device;
+        });
+    }
+    static getDeviceIdByFeed(feedId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const device = yield device_model_1.default.getDeviceIdByFeed(feedId);
             if (!device) {
                 throw new errorRespone_1.NotFoundError("Device not found");
             }
