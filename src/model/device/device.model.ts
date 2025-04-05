@@ -41,9 +41,6 @@ class DeviceModel {
     }
 
     static async getDeviceIdByFeed(feedId: string) {
-        ///////////////////////////////////////////////////////////////////////////////
-        // feedId = 'living-room-light-feed2';  //////// hardcoding for testing purposes
-
         const device = await db.query("SELECT id FROM devices WHERE feet = $1", [feedId]);
         return device.rows[0];
     }
