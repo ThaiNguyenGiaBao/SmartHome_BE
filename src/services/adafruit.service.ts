@@ -51,14 +51,11 @@ export class AdafruitService extends EventEmitter {
 
     static async pullEnvLogData() {
         setInterval(async () => {
-          // call the adafruit api to get the data 
-  
-          // save the data to the database
-          //this.createLog(data)
-    
+            // call the adafruit api to get the data
+            // save the data to the database
+            //this.createLog(data)
         }, 10000);
-      }
-  
+    }
 
     // Subscribe to a specific feed topic
     public subscribe(feed: string, messageHandler: (topic: string, message: string) => void): void {
@@ -155,42 +152,38 @@ export class AdafruitService extends EventEmitter {
     }
 
     public async pullEnvLogData() {
-        this.pollInterval = setInterval(async () => {
-            try {
-                // 1) Fetch all feeds
-                const feedsRes = await axios.get(
-                    `https://io.adafruit.com/api/v2/${this.username}/feeds`,
-                    { headers: { "X-AIO-Key": this.aioKey } }
-                );
-                // 2) For each feed, fetch the latest data
-                for (const feed of feedsRes.data) {
-                    const latest = feed.last_value;
-                    // 3) Find the device ID for this feed
-                    const deviceId = await DeviceService.getDeviceIdByFeed(feed.key);
-
-                    // 4) Log to DB 
-                    // (only if the value is a integer or float number string and not 0 or 1 (buttons))
-                    if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
-                        const EnvLogService = require("../services/envLog.service").default;
-    
-                        await EnvLogService.createLog({
-                            deviceId: deviceId.id,
-                            value: parseInt(latest, 10)
-                        });
-
-                        //5) Emit WebSocket event
-                        this.emit("newReading", {
-                            deviceId: deviceId.id,
-                            value: parseInt(latest, 10)
-                        });
-                    }
-                    
-                }
-                console.log("Data pulled successfully from all feeds.");
-            } catch (error: any) {
-                console.error("Error pulling data:", error.message);
-            }
-        }, 10000);
+        // this.pollInterval = setInterval(async () => {
+        //     try {
+        //         // 1) Fetch all feeds
+        //         const feedsRes = await axios.get(
+        //             `https://io.adafruit.com/api/v2/${this.username}/feeds`,
+        //             { headers: { "X-AIO-Key": this.aioKey } }
+        //         );
+        //         // 2) For each feed, fetch the latest data
+        //         for (const feed of feedsRes.data) {
+        //             const latest = feed.last_value;
+        //             // 3) Find the device ID for this feed
+        //             const deviceId = await DeviceService.getDeviceIdByFeed(feed.key);
+        //             // 4) Log to DB
+        //             // (only if the value is a integer or float number string and not 0 or 1 (buttons))
+        //             if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
+        //                 const EnvLogService = require("../services/envLog.service").default;
+        //                 // await EnvLogService.createLog({
+        //                 //     deviceId: deviceId.id,
+        //                 //     value: parseInt(latest, 10)
+        //                 // });
+        //                 //5) Emit WebSocket event
+        //                 this.emit("newReading", {
+        //                     deviceId: deviceId.id,
+        //                     value: parseInt(latest, 10)
+        //                 });
+        //             }
+        //         }
+        //         console.log("Data pulled successfully from all feeds.");
+        //     } catch (error: any) {
+        //         console.error("Error pulling data:", error.message);
+        //     }
+        // }, 10000);
     }
 
     private pollInterval: NodeJS.Timeout | null = null;

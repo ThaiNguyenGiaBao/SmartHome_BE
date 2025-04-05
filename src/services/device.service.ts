@@ -80,8 +80,8 @@ class DeviceService {
             name: name,
             description: "This is a block for " + name,
             visual_type: type,
-            size_x: 5,
-            size_y: 5
+            size_x: 0,
+            size_y: 0
         };
 
         const block = await adafruitService.createBlock(blockData);

@@ -8,16 +8,17 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import AdafruitService from "./services/adafruit.service";
 
-
-
 export const adafruitService = new AdafruitService();
 adafruitService.connect();
 //adafruitService.pullEnvLogData();
-
-
+adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
+    console.log("AdafruitService::subscribe", topic, message);
+});
+adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
+    console.log("AdafruitService::subscribe", topic, message);
+});
 
 const app = express();
-
 
 // init middleware
 app.use(morgan("dev"));
@@ -28,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
     cors({
         origin: true, // This is a security issue, allowing all origins
-        credentials: true, // This allows cookies to be sent/received
+        credentials: true // This allows cookies to be sent/received
         //methods: ["GET", "POST", "PUT", "PATCH","DELETE", "OPTIONS"] // Allow OPTIONS for preflight
     })
 );
@@ -36,8 +37,6 @@ app.use(cookieParser());
 
 // init router
 app.use("/api", router);
-
-
 
 // handle errors
 app.use((req: Request, res: Response, next: NextFunction) => {
