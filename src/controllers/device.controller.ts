@@ -3,6 +3,24 @@ import { OK, Created } from "../helper/successResponse";
 import DeviceService from "../services/device.service";
 
 class DeviceController {
+    // router.post("/", asyncHandler(DeviceController.createDevice));
+    static async createDevice(req: Request, res: Response) {
+        console.log("DeviceController::createDevice", req.body);
+        return new Created({
+            message: "Device created successfully",
+            data: await DeviceService.createDevice(req.body, req.user.id)
+        }).send(res);
+    }
+
+    // router.get("/async", asyncHandler(DeviceController.syncBlocksDatabaseAdafruitIo));
+    static async syncBlocksDatabaseAdafruitIo(req: Request, res: Response) {
+        console.log("DeviceController::asyncBlock");
+        return new OK({
+            message: "Async block",
+            data: await DeviceService.syncBlocksDatabaseAdafruitIo()
+        }).send(res);
+    }
+
     // router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
     static async getDeviceStateById(req: Request, res: Response) {
         console.log("DeviceController::getAllDeviceStateById", req.params.id);
@@ -29,14 +47,6 @@ class DeviceController {
             data: await DeviceService.updateDeviceStateById(req.params.id, req.query.command as string)
         }).send(res);
     }
-    // router.post("/", asyncHandler(DeviceController.createDevice));
-    static async createDevice(req: Request, res: Response) {
-        console.log("DeviceController::createDevice", req.body);
-        return new Created({
-            message: "Device created successfully",
-            data: await DeviceService.createDevice(req.body)
-        }).send(res);
-    }
 
     // router.get("/:id", asyncHandler(DeviceController.getDeviceById));
     static async getDeviceById(req: Request, res: Response) {
@@ -49,10 +59,10 @@ class DeviceController {
 
     // router.get("/user/:userId", asyncHandler(DeviceController.getDeviceByUserId));
     static async getDeviceByUserId(req: Request, res: Response) {
-        console.log("DeviceController::getDeviceByUserId", req.params.userId);
+        console.log("DeviceController::getDeviceByUserId", req.user.id);
         return new OK({
-            message: "Device fetched successfully",
-            data: await DeviceService.getDeviceByUserId(req.params.userId)
+            message: "Device fetched by user id successfully",
+            data: await DeviceService.getDeviceByUserId(req.user.id)
         }).send(res);
     }
 

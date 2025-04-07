@@ -17,28 +17,22 @@ type Device = {
     user_id: string;
     name: string;
     type: string;
-    status: "on" | "off" | "inactive";
     room: string;
-    feet: string;
+    feed_key: string;
+    image_url: string;
+    block_id: string;
 };
 
 type DeviceUpdate = Partial<Device>;
-type DeviceCreate = Omit<Device, "id">;
 
-export interface BlockFeed {
-    id: string; // A unique identifier for the feed association
-    feed: any; // The feed key (e.g., "living-room-light-2")
-    group: any; // The group the feed belongs to (e.g., "default")
-}
-export interface Block {
-    name: string; // Display name for the block
-    description: string; // A brief description of the block
-    key: string; // Unique key for the block
-    visual_type: string; // Visual type (set to "toggle" for a toggle block)
-    size_x: number; // Width of the block (in grid units)
-    size_y: number; // Height of the block (in grid units)
-    block_feeds: BlockFeed[]; // Array of associated feeds
-}
+type DeviceCreate = {
+    user_id: string;
+    name: string;
+    type: string;
+    room: string;
+    feed_key: string;
+    block_id: string;
+};
 
 export interface Feed {
     name: string;
@@ -46,4 +40,4 @@ export interface Feed {
 }
 
 export default Device;
-export { DeviceUpdate, DeviceCreate };
+export { DeviceUpdate, DeviceCreate, Device };
