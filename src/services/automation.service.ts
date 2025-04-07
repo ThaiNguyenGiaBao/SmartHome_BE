@@ -13,17 +13,16 @@ class AutomationService {
             throw new BadRequestError("Invalid automation id");
         }
 
-        
-
         const automation = await AutomationModel.getAutomationById(id);
-
-        const device = await DeviceModel.getDeviceById(automation.deviceId);
-        if (!device || device.user_id !== user_id) {
-            throw new ForbiddenError("Cannot get automation for other user's device");
-        }
-
         if (!automation) {
             throw new NotFoundError("Automation not found");
+        }
+        //console.log(automation);
+
+        const device = await DeviceModel.getDeviceById(automation.device_id);
+        //console.log(device.user_id, user_id);
+        if (!device || device.user_id !== user_id) {
+            throw new ForbiddenError("Cannot get automation for other user's device");
         }
 
         return automation;
@@ -72,23 +71,18 @@ class AutomationService {
             throw new ForbiddenError("Cannot update device id");
         }
 
-        
-
-        const automation = await AutomationModel.updateAutomation(id, updates);
+        const automation = await AutomationModel.getAutomationById(id);
         if (!automation) {
             throw new NotFoundError("Automation not found");
         }
-        const device = await DeviceModel.getDeviceById(automation.deviceId);
-        if (!device) {
-            throw new NotFoundError("Device not found");
-        }
+
+        const device = await DeviceModel.getDeviceById(automation.device_id);
 
         if (device.user_id !== userId) {
             throw new ForbiddenError("Cannot get automation for other user's device");
         }
 
-        
-        return automation;
+        return await AutomationModel.updateAutomation(id, updates);
     }
     // router.delete("/:id", asyncHandler(AutomationController.deleteAutomation));
     static async deleteAutomation(id: string, userId: string) {
@@ -96,18 +90,19 @@ class AutomationService {
             throw new BadRequestError("Invalid automation id");
         }
 
-        const device = await DeviceModel.getDeviceById(id);
-        if (!device) {
-            throw new NotFoundError("Device not found");
-        }
-        if (device.user_id !== userId) {
-            throw new ForbiddenError("Cannot delete automation for other user's device");
-        }
-
-        const automation = await AutomationModel.deleteAutomation(id);
+        const automation = await AutomationModel.getAutomationById(id);
         if (!automation) {
             throw new NotFoundError("Automation not found");
         }
+
+        const device = await DeviceModel.getDeviceById(automation.device_id);
+
+        if (!device || device.user_id !== userId) {
+            throw new ForbiddenError("Cannot delete automation for other user's device");
+        }
+
+        await AutomationModel.deleteAutomation(id);
+
         return automation;
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));

@@ -12,9 +12,10 @@ export class AdafruitService extends EventEmitter {
     public username: string;
     public aioKey: string;
     private baseUrl: string;
-    private client: mqtt.MqttClient | null;
+    private client: mqtt.MqttClient;
     private dashboardId: string;
     private messageHandlers: { [topic: string]: (topic: string, message: string) => void } = {};
+    private static instance: AdafruitService | null = null;
 
     constructor() {
         super();
@@ -22,16 +23,20 @@ export class AdafruitService extends EventEmitter {
         this.aioKey = process.env.ADAFRUIT_IO_KEY || "";
         this.baseUrl = "mqtts://io.adafruit.com";
         this.dashboardId = "dashboards";
-        this.client = null;
-    }
-
-    // Establishes connection with Adafruit IO using MQTT
-    public async connect(): Promise<void> {
         this.client = mqtt.connect(this.baseUrl, {
             username: this.username,
             password: this.aioKey
         });
+    }
+    public static getInstance() {
+        if (!AdafruitService.instance) {
+            AdafruitService.instance = new AdafruitService();
+        }
+        return AdafruitService.instance;
+    }
 
+    // Establishes connection with Adafruit IO using MQTT
+    public async connect(): Promise<void> {
         this.client.on("connect", () => {
             console.log("Connected to Adafruit IO MQTT");
         });

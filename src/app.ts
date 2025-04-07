@@ -8,15 +8,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import AdafruitService from "./services/adafruit/adafruit.service";
 
-export const adafruitService = new AdafruitService();
+export const adafruitService = AdafruitService.getInstance();
 adafruitService.connect();
 //adafruitService.pullEnvLogData();
-adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
-    console.log("AdafruitService::subscribe", topic, message);
-});
-adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
-    console.log("AdafruitService::subscribe", topic, message);
-});
 
 const app = express();
 

@@ -27,7 +27,6 @@ io.on("connection", (socket) => {
 
 adafruitService.on("newReading", (data) => {
     io.emit("newReading", data);
-    console.log("New reading:", data);
 });
 
 
