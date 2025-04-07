@@ -30,14 +30,7 @@ class DeviceController {
         }).send(res);
     }
 
-    // router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
-    static async getCurrentDeviceStateById(req: Request, res: Response) {
-        console.log("DeviceController::getCurrentDeviceStateById", req.params.id);
-        return new OK({
-            message: "Device state fetched successfully",
-            data: await DeviceService.getCurrentDeviceStateById(req.params.id)
-        }).send(res);
-    }
+ 
 
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static async updateDeviceStateById(req: Request, res: Response) {

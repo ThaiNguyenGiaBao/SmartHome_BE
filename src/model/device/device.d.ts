@@ -21,6 +21,7 @@ type Device = {
     feed_key: string;
     image_url: string;
     block_id: string;
+    state: string;
 };
 
 type DeviceUpdate = Partial<Device>;

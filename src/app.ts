@@ -6,7 +6,7 @@ import router from "./router/index";
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import AdafruitService from "./services/adafruit.service";
+import AdafruitService from "./services/adafruit/adafruit.service";
 
 export const adafruitService = new AdafruitService();
 adafruitService.connect();

@@ -21,7 +21,6 @@ router.patch("/:id", asyncHandler(DeviceController.updateDevice));
 router.delete("/:id", asyncHandler(DeviceController.deleteDevice));
 
 router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
-router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
 
 router.post("/control/:id", asyncHandler(DeviceController.updateDeviceStateById));
 

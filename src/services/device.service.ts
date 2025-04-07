@@ -2,7 +2,9 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "../helper/errorR
 
 import { checkUUID } from "../utils";
 import { adafruitService } from "../app";
-import { DeviceCreate, DeviceUpdate, Feed } from "../model/device/device";
+import { BlockService } from "./adafruit/block.service";
+import { FeedService } from "./adafruit/feed.service";
+import Device, { DeviceCreate, DeviceUpdate, Feed } from "../model/device/device";
 import DeviceModel from "../model/device/device.model";
 import axios from "axios";
 
@@ -23,36 +25,36 @@ class DeviceService {
             y: 0
         };
 
-        const block = await adafruitService.createBlock(blockData);
+        const block = await BlockService.createBlock(blockData);
 
         const feedData: Feed = {
             name: name, // Feed name is the same as device name
             description: "This is a feed for " + name
         };
 
-        const feed = await adafruitService.createFeed(feedData);
+        const feed = await FeedService.createFeed(feedData);
         const device = await DeviceModel.createDevice({ user_id, name, type, room, feed_key: feed.key, block_id: block.id });
         return device;
     }
 
     static async syncBlocksDatabaseAdafruitIo() {
-        const blocks = await adafruitService.getAllBlocks();
+        const blocks = await BlockService.getAllBlocks();
         //console.log("Blocks", blocks.data);
         for (const block of blocks.data) {
             const device = await DeviceModel.getDeviceByBlockId(block.id);
             if (!device) {
                 // Delete the block if the device is not found
-                await adafruitService.deleteBlockById(block.id);
+                await BlockService.deleteBlockById(block.id);
             }
         }
 
-        const feeds = await adafruitService.getAllFeeds();
+        const feeds = await FeedService.getAllFeeds();
         //console.log("Feeds", feeds.data);
         for (const feed of feeds.data) {
             const device = await DeviceModel.getDeviceIdByFeed(feed.key);
             if (!device) {
                 // Delete the feed if the device is not found
-                await adafruitService.deleteFeedById(feed.key);
+                await FeedService.deleteFeedById(feed.key);
             }
         }
     }
@@ -68,26 +70,6 @@ class DeviceService {
         }
 
         const endpoint = `https://io.adafruit.com/api/v2/${adafruitService.username}/feeds/${device.feed_key}/data`;
-        const response = await axios.get(endpoint, {
-            headers: {
-                "X-AIO-Key": adafruitService.aioKey
-            }
-        });
-
-        return response.data;
-    }
-
-    static async getCurrentDeviceStateById(id: string) {
-        if (!checkUUID(id)) {
-            throw new BadRequestError("Invalid device id");
-        }
-
-        const device = await DeviceModel.getDeviceById(id);
-        if (!device) {
-            throw new NotFoundError("Device not found");
-        }
-
-        const endpoint = `https://io.adafruit.com/api/v2/${adafruitService.username}/feeds/${device.feed_key}/data/last`;
         const response = await axios.get(endpoint, {
             headers: {
                 "X-AIO-Key": adafruitService.aioKey
@@ -116,7 +98,9 @@ class DeviceService {
         if (!checkUUID(id)) {
             throw new BadRequestError("Invalid device id");
         }
-        const device = await DeviceModel.getDeviceById(id);
+        const device: Device = await DeviceModel.getDeviceById(id);
+        device.state = await FeedService.getStatusFeed(device.feed_key);
+        console.log(device.state);
 
         return device;
     }
@@ -127,9 +111,16 @@ class DeviceService {
             throw new BadRequestError("Invalid user id");
         }
 
-        const device = await DeviceModel.getDeviceByUserId(userId);
+        const deviceList = await DeviceModel.getDeviceByUserId(userId);
 
-        return device;
+        // Promise all
+        const devicePromises = deviceList.map(async (device: Device) => {
+            device.state = await FeedService.getStatusFeed(device.feed_key);
+            return device;
+        });
+        const deviceListWithState: Device[] = await Promise.all(devicePromises);
+
+        return deviceListWithState;
     }
 
     // router.patch("/update/:id", asyncHandler(DeviceController.updateDevice));

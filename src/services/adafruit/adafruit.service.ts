@@ -1,9 +1,9 @@
 import * as mqtt from "mqtt";
 import dotenv from "dotenv";
 import axios from "axios";
-import { BadRequestError } from "../helper/errorRespone";
-import { Feed } from "../model/device/device";
-import DeviceService from "./device.service";
+import { BadRequestError } from "../../helper/errorRespone";
+import { Feed } from "../../model/device/device";
+import DeviceService from "../device.service";
 import { EventEmitter } from "events";
 
 dotenv.config();
