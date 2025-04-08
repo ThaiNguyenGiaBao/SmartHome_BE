@@ -24,7 +24,7 @@ export class FeedService {
             // automatically subscribe to the new feed
             const feedKey = response.data.key;
 
-            adafruitService.subscribe(feedKey, (topic, message) => {});
+            adafruitService.subscribe(feedKey);
             console.log("Subscribed to new feed:", feedKey);
             return response.data;
         } catch (error: any) {

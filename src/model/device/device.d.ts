@@ -22,6 +22,7 @@ type Device = {
     image_url: string;
     block_id: string;
     state: string;
+    category: string;
 };
 
 type DeviceUpdate = Partial<Device>;
@@ -33,6 +34,7 @@ type DeviceCreate = {
     room: string;
     feed_key: string;
     block_id: string;
+    category: string;
 };
 
 export interface Feed {

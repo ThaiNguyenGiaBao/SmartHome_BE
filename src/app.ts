@@ -8,9 +8,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import AdafruitService from "./services/adafruit/adafruit.service";
 
+
 export const adafruitService = AdafruitService.getInstance();
 adafruitService.connect();
-//adafruitService.pullEnvLogData();
+
 
 const app = express();
 

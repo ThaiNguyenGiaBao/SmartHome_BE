@@ -10,7 +10,7 @@ import axios from "axios";
 
 class DeviceService {
     // router.post("/", asyncHandler(DeviceController.createDevice));
-    static async createDevice({ name, type, room }: DeviceCreate, user_id: string) {
+    static async createDevice({ name, type, room, category }: DeviceCreate, user_id: string) {
         if (!user_id || !name || !type) {
             throw new ForbiddenError("user_id, name, type, feet are required");
         }
@@ -33,7 +33,7 @@ class DeviceService {
         };
 
         const feed = await FeedService.createFeed(feedData);
-        const device = await DeviceModel.createDevice({ user_id, name, type, room, feed_key: feed.key, block_id: block.id });
+        const device = await DeviceModel.createDevice({ user_id, name, type, room, feed_key: feed.key, block_id: block.id, category });
         return device;
     }
 
@@ -156,8 +156,8 @@ class DeviceService {
         }
 
         // Delete the block and feed from Adafruit IO
-        await adafruitService.deleteBlockById(device.block_id);
-        await adafruitService.deleteFeedById(device.feed_key);
+        await BlockService.deleteBlockById(device.block_id);
+        await FeedService.deleteFeedById(device.feed_key);
 
         await DeviceModel.deleteDevice(id);
 

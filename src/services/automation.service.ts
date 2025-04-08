@@ -106,11 +106,14 @@ class AutomationService {
         return automation;
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
-    static async createAutomation({ deviceId, name, low, high, description, action, isActive }: AutomationCreate, userId: string) {
+    static async createAutomation(
+        { deviceId, name, low, high, description, action, isActive, category }: AutomationCreate,
+        userId: string
+    ) {
         if (!checkUUID(deviceId)) {
             throw new BadRequestError("Invalid device id");
         }
-        if (!name || !low || !high || !action) {
+        if (!name || low == undefined || high == undefined || !action) {
             throw new BadRequestError("name, low, high, action are required");
         }
         if (low > high) {
@@ -126,7 +129,7 @@ class AutomationService {
             throw new ForbiddenError("Cannot create automation for other user's device");
         }
 
-        const result = await AutomationModel.createAutomation({ deviceId, name, low, high, description, action, isActive });
+        const result = await AutomationModel.createAutomation({ deviceId, name, low, high, description, action, isActive, category });
         return result;
     }
 }

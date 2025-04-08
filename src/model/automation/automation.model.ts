@@ -10,12 +10,27 @@ class AutomationModel {
     }
     // router.get("/user/:userId", asyncHandler(AutomationController.getAutomationByUserId));
     static async getAutomationByUserId(userId: string) {
-        const automation = await db.query("select a.* from users u join devices d on u.id = d.user_id join automation_scenarios a on a.device_id = d.id where u.id = $1", [userId]);
+        const automation = await db.query(
+            "select a.* from users u join devices d on u.id = d.user_id join automation_scenarios a on a.device_id = d.id where u.id = $1",
+            [userId]
+        );
         return automation.rows;
     }
     // router.get("/device/:deviceId", asyncHandler(AutomationController.getAutomationByDeviceId));
     static async getAutomationByDeviceId(deviceId: string) {
-        const automation = await db.query("SELECT * FROM automation_scenarios WHERE device_id = $1", [deviceId]);
+        const automation = await db.query("SELECT * FROM automation_scenarios a  WHERE device_id = $1", [deviceId]);
+        return automation.rows;
+    }
+    static async getAutomationByFeedKey(feed_key: string) {
+        const automation = await db.query(
+            "select a.* from devices d join automation_scenarios a on a.device_id = d.id  where d.feed_key = $1",
+            [feed_key]
+        );
+        return automation.rows[0];
+    }
+
+    static async getAutomationByCategory(category: string) {
+        const automation = await db.query("SELECT * FROM automation_scenarios WHERE category = $1", [category]);
         return automation.rows;
     }
 
@@ -38,11 +53,11 @@ class AutomationModel {
     }
 
     // router.post("/", asyncHandler(AutomationController.createAutomation));
-    static async createAutomation({ deviceId, name, low, high, action, isActive }: AutomationCreate) {
+    static async createAutomation({ deviceId, name, low, high, action, isActive, category }: AutomationCreate) {
         const result = await db.query(
-            `INSERT INTO automation_scenarios (device_id, name, low, high, action, is_active)
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [deviceId, name, low, high, action, isActive]
+            `INSERT INTO automation_scenarios (device_id, name, low, high, action, is_active,category)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [deviceId, name, low, high, action, isActive, category]
         );
         return result.rows[0];
     }
