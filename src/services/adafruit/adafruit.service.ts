@@ -7,7 +7,7 @@ import DeviceService from "../device.service";
 import { EventEmitter } from "events";
 import DeviceModel from "../../model/device/device.model";
 import FeedService from "./feed.service";
-
+import DataObserver from "../Observer/observer";
 dotenv.config();
 
 export class AdafruitService extends EventEmitter {
@@ -36,9 +36,9 @@ export class AdafruitService extends EventEmitter {
                 return;
             }
             const category = device.category;
-
-            console.log("Device category:", category);
-            this.emit(category, { room: device.room, deviceId: device.id, value: parsedMessage });
+            const data: DataObserver = { room: device.room, rawValue: parsedMessage };
+            //console.log("Device category:", category);
+            this.emit(category, data);
         });
     }
 

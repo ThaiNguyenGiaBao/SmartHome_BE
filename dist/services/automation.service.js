@@ -24,12 +24,14 @@ class AutomationService {
                 throw new errorRespone_1.BadRequestError("Invalid automation id");
             }
             const automation = yield automation_model_1.default.getAutomationById(id);
-            const device = yield device_model_1.default.getDeviceById(automation.deviceId);
-            if (!device || device.user_id !== user_id) {
-                throw new errorRespone_1.ForbiddenError("Cannot get automation for other user's device");
-            }
             if (!automation) {
                 throw new errorRespone_1.NotFoundError("Automation not found");
+            }
+            //console.log(automation);
+            const device = yield device_model_1.default.getDeviceById(automation.device_id);
+            //console.log(device.user_id, user_id);
+            if (!device || device.user_id !== user_id) {
+                throw new errorRespone_1.ForbiddenError("Cannot get automation for other user's device");
             }
             return automation;
         });
@@ -74,18 +76,15 @@ class AutomationService {
             if (updates.deviceId) {
                 throw new errorRespone_1.ForbiddenError("Cannot update device id");
             }
-            const automation = yield automation_model_1.default.updateAutomation(id, updates);
+            const automation = yield automation_model_1.default.getAutomationById(id);
             if (!automation) {
                 throw new errorRespone_1.NotFoundError("Automation not found");
             }
-            const device = yield device_model_1.default.getDeviceById(automation.deviceId);
-            if (!device) {
-                throw new errorRespone_1.NotFoundError("Device not found");
-            }
+            const device = yield device_model_1.default.getDeviceById(automation.device_id);
             if (device.user_id !== userId) {
                 throw new errorRespone_1.ForbiddenError("Cannot get automation for other user's device");
             }
-            return automation;
+            return yield automation_model_1.default.updateAutomation(id, updates);
         });
     }
     // router.delete("/:id", asyncHandler(AutomationController.deleteAutomation));
@@ -94,27 +93,25 @@ class AutomationService {
             if (!(0, utils_1.checkUUID)(id)) {
                 throw new errorRespone_1.BadRequestError("Invalid automation id");
             }
-            const device = yield device_model_1.default.getDeviceById(id);
-            if (!device) {
-                throw new errorRespone_1.NotFoundError("Device not found");
-            }
-            if (device.user_id !== userId) {
-                throw new errorRespone_1.ForbiddenError("Cannot delete automation for other user's device");
-            }
-            const automation = yield automation_model_1.default.deleteAutomation(id);
+            const automation = yield automation_model_1.default.getAutomationById(id);
             if (!automation) {
                 throw new errorRespone_1.NotFoundError("Automation not found");
             }
+            const device = yield device_model_1.default.getDeviceById(automation.device_id);
+            if (!device || device.user_id !== userId) {
+                throw new errorRespone_1.ForbiddenError("Cannot delete automation for other user's device");
+            }
+            yield automation_model_1.default.deleteAutomation(id);
             return automation;
         });
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
     static createAutomation(_a, userId_1) {
-        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, description, action, isActive }, userId) {
+        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, description, action, isActive, category }, userId) {
             if (!(0, utils_1.checkUUID)(deviceId)) {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
-            if (!name || !low || !high || !action) {
+            if (!name || low == undefined || high == undefined || !action) {
                 throw new errorRespone_1.BadRequestError("name, low, high, action are required");
             }
             if (low > high) {
@@ -127,7 +124,7 @@ class AutomationService {
             if (device.user_id !== userId) {
                 throw new errorRespone_1.ForbiddenError("Cannot create automation for other user's device");
             }
-            const result = yield automation_model_1.default.createAutomation({ deviceId, name, low, high, description, action, isActive });
+            const result = yield automation_model_1.default.createAutomation({ deviceId, name, low, high, description, action, isActive, category });
             return result;
         });
     }

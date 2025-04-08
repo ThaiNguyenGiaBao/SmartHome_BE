@@ -15,9 +15,58 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const errorRespone_1 = require("../helper/errorRespone");
 const utils_1 = require("../utils");
 const app_1 = require("../app");
+const block_service_1 = require("./adafruit/block.service");
+const feed_service_1 = require("./adafruit/feed.service");
 const device_model_1 = __importDefault(require("../model/device/device.model"));
 const axios_1 = __importDefault(require("axios"));
 class DeviceService {
+    // router.post("/", asyncHandler(DeviceController.createDevice));
+    static createDevice(_a, user_id_1) {
+        return __awaiter(this, arguments, void 0, function* ({ name, type, room, category }, user_id) {
+            if (!user_id || !name || !type) {
+                throw new errorRespone_1.ForbiddenError("user_id, name, type, feet are required");
+            }
+            const blockData = {
+                name: name,
+                description: "This is a block for " + name,
+                visual_type: type,
+                size_x: 3,
+                size_y: 3,
+                x: 0,
+                y: 0
+            };
+            const block = yield block_service_1.BlockService.createBlock(blockData);
+            const feedData = {
+                name: name, // Feed name is the same as device name
+                description: "This is a feed for " + name
+            };
+            const feed = yield feed_service_1.FeedService.createFeed(feedData);
+            const device = yield device_model_1.default.createDevice({ user_id, name, type, room, feed_key: feed.key, block_id: block.id, category });
+            return device;
+        });
+    }
+    static syncBlocksDatabaseAdafruitIo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const blocks = yield block_service_1.BlockService.getAllBlocks();
+            //console.log("Blocks", blocks.data);
+            for (const block of blocks.data) {
+                const device = yield device_model_1.default.getDeviceByBlockId(block.id);
+                if (!device) {
+                    // Delete the block if the device is not found
+                    yield block_service_1.BlockService.deleteBlockById(block.id);
+                }
+            }
+            const feeds = yield feed_service_1.FeedService.getAllFeeds();
+            //console.log("Feeds", feeds.data);
+            for (const feed of feeds.data) {
+                const device = yield device_model_1.default.getDeviceIdByFeed(feed.key);
+                if (!device) {
+                    // Delete the feed if the device is not found
+                    yield feed_service_1.FeedService.deleteFeedById(feed.key);
+                }
+            }
+        });
+    }
     static getDeviceStateById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, utils_1.checkUUID)(id)) {
@@ -27,25 +76,7 @@ class DeviceService {
             if (!device) {
                 throw new errorRespone_1.NotFoundError("Device not found");
             }
-            const endpoint = `https://io.adafruit.com/api/v2/${app_1.adafruitService.username}/feeds/${device.feed}/data`;
-            const response = yield axios_1.default.get(endpoint, {
-                headers: {
-                    "X-AIO-Key": app_1.adafruitService.aioKey
-                }
-            });
-            return response.data;
-        });
-    }
-    static getCurrentDeviceStateById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!(0, utils_1.checkUUID)(id)) {
-                throw new errorRespone_1.BadRequestError("Invalid device id");
-            }
-            const device = yield device_model_1.default.getDeviceById(id);
-            if (!device) {
-                throw new errorRespone_1.NotFoundError("Device not found");
-            }
-            const endpoint = `https://io.adafruit.com/api/v2/${app_1.adafruitService.username}/feeds/${device.feed}/data/last`;
+            const endpoint = `https://io.adafruit.com/api/v2/${app_1.adafruitService.username}/feeds/${device.feed_key}/data`;
             const response = yield axios_1.default.get(endpoint, {
                 headers: {
                     "X-AIO-Key": app_1.adafruitService.aioKey
@@ -64,30 +95,7 @@ class DeviceService {
             if (!device) {
                 throw new errorRespone_1.NotFoundError("Device not found");
             }
-            app_1.adafruitService.publish(device.feet, command);
-        });
-    }
-    // router.post("/", asyncHandler(DeviceController.createDevice));
-    static createDevice(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ user_id, name, type, status, room, feet }) {
-            if (!user_id || !name || !type || !feet) {
-                throw new errorRespone_1.ForbiddenError("user_id, name, type, feet are required");
-            }
-            const feedData = {
-                name: feet,
-                description: "This is a feed for " + name
-            };
-            const feed = yield app_1.adafruitService.createFeed(feedData);
-            const blockData = {
-                name: name,
-                description: "This is a block for " + name,
-                visual_type: type,
-                size_x: 0,
-                size_y: 0
-            };
-            const block = yield app_1.adafruitService.createBlock(blockData);
-            const device = yield device_model_1.default.createDevice({ user_id, name, type, status, room, feet });
-            return device;
+            app_1.adafruitService.publish(device.feed_key, command);
         });
     }
     // router.get("/:id", asyncHandler(DeviceController.getDeviceById));
@@ -97,6 +105,8 @@ class DeviceService {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
             const device = yield device_model_1.default.getDeviceById(id);
+            device.state = yield feed_service_1.FeedService.getStatusFeed(device.feed_key);
+            console.log(device.state);
             return device;
         });
     }
@@ -106,8 +116,14 @@ class DeviceService {
             if (!(0, utils_1.checkUUID)(userId)) {
                 throw new errorRespone_1.BadRequestError("Invalid user id");
             }
-            const device = yield device_model_1.default.getDeviceByUserId(userId);
-            return device;
+            const deviceList = yield device_model_1.default.getDeviceByUserId(userId);
+            // Promise all
+            const devicePromises = deviceList.map((device) => __awaiter(this, void 0, void 0, function* () {
+                device.state = yield feed_service_1.FeedService.getStatusFeed(device.feed_key);
+                return device;
+            }));
+            const deviceListWithState = yield Promise.all(devicePromises);
+            return deviceListWithState;
         });
     }
     // router.patch("/update/:id", asyncHandler(DeviceController.updateDevice));
@@ -120,7 +136,7 @@ class DeviceService {
             if (Object.keys(updates).length === 0) {
                 throw new errorRespone_1.BadRequestError("No update data");
             }
-            if (updates.feet) {
+            if (updates.feed_key) {
                 throw new errorRespone_1.BadRequestError("Cannot update feet");
             }
             const device = yield device_model_1.default.updateDevice(id, updates);
@@ -136,10 +152,14 @@ class DeviceService {
             if (!(0, utils_1.checkUUID)(id)) {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
-            const device = yield device_model_1.default.deleteDevice(id);
+            const device = yield device_model_1.default.getDeviceById(id);
             if (!device) {
                 throw new errorRespone_1.NotFoundError("Device not found");
             }
+            // Delete the block and feed from Adafruit IO
+            yield block_service_1.BlockService.deleteBlockById(device.block_id);
+            yield feed_service_1.FeedService.deleteFeedById(device.feed_key);
+            yield device_model_1.default.deleteDevice(id);
             return device;
         });
     }

@@ -15,6 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const successResponse_1 = require("../helper/successResponse");
 const device_service_1 = __importDefault(require("../services/device.service"));
 class DeviceController {
+    // router.post("/", asyncHandler(DeviceController.createDevice));
+    static createDevice(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("DeviceController::createDevice", req.body);
+            return new successResponse_1.Created({
+                message: "Device created successfully",
+                data: yield device_service_1.default.createDevice(req.body, req.user.id)
+            }).send(res);
+        });
+    }
+    // router.get("/async", asyncHandler(DeviceController.syncBlocksDatabaseAdafruitIo));
+    static syncBlocksDatabaseAdafruitIo(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("DeviceController::asyncBlock");
+            return new successResponse_1.OK({
+                message: "Async block",
+                data: yield device_service_1.default.syncBlocksDatabaseAdafruitIo()
+            }).send(res);
+        });
+    }
     // router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
     static getDeviceStateById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -25,16 +45,6 @@ class DeviceController {
             }).send(res);
         });
     }
-    // router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
-    static getCurrentDeviceStateById(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("DeviceController::getCurrentDeviceStateById", req.params.id);
-            return new successResponse_1.OK({
-                message: "Device state fetched successfully",
-                data: yield device_service_1.default.getCurrentDeviceStateById(req.params.id)
-            }).send(res);
-        });
-    }
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static updateDeviceStateById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -42,16 +52,6 @@ class DeviceController {
             return new successResponse_1.OK({
                 message: "Device state updated successfully",
                 data: yield device_service_1.default.updateDeviceStateById(req.params.id, req.query.command)
-            }).send(res);
-        });
-    }
-    // router.post("/", asyncHandler(DeviceController.createDevice));
-    static createDevice(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("DeviceController::createDevice", req.body);
-            return new successResponse_1.Created({
-                message: "Device created successfully",
-                data: yield device_service_1.default.createDevice(req.body)
             }).send(res);
         });
     }
@@ -68,10 +68,10 @@ class DeviceController {
     // router.get("/user/:userId", asyncHandler(DeviceController.getDeviceByUserId));
     static getDeviceByUserId(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("DeviceController::getDeviceByUserId", req.params.userId);
+            console.log("DeviceController::getDeviceByUserId", req.user.id);
             return new successResponse_1.OK({
-                message: "Device fetched successfully",
-                data: yield device_service_1.default.getDeviceByUserId(req.params.userId)
+                message: "Device fetched by user id successfully",
+                data: yield device_service_1.default.getDeviceByUserId(req.user.id)
             }).send(res);
         });
     }

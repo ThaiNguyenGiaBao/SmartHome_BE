@@ -11,16 +11,16 @@ const compression_1 = __importDefault(require("compression"));
 const index_1 = __importDefault(require("./router/index"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const adafruit_service_1 = __importDefault(require("./services/adafruit.service"));
-exports.adafruitService = new adafruit_service_1.default();
+const adafruit_service_1 = __importDefault(require("./services/adafruit/adafruit.service"));
+const subject_1 = __importDefault(require("./services/Observer/subject"));
+exports.adafruitService = adafruit_service_1.default.getInstance();
 exports.adafruitService.connect();
-//adafruitService.pullEnvLogData();
-exports.adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
-    console.log("AdafruitService::subscribe", topic, message);
-});
-exports.adafruitService.subscribe("living-room-light-feed-1", (topic, message) => {
-    console.log("AdafruitService::subscribe", topic, message);
-});
+const smokeSubject = new subject_1.default("smoke");
+smokeSubject.listen();
+const lightSubject = new subject_1.default("light");
+lightSubject.listen();
+const fireSubject = new subject_1.default("fire");
+fireSubject.listen();
 const app = (0, express_1.default)();
 // init middleware
 app.use((0, morgan_1.default)("dev"));

@@ -25,10 +25,6 @@ exports.io.on("connection", (socket) => {
         console.log("Socket disconnected:", socket.id);
     });
 });
-app_2.adafruitService.on("newReading", (data) => {
-    exports.io.emit("newReading", data);
-    console.log("New reading:", data);
-});
 process.on("SIGINT", () => {
     app_2.adafruitService.stopPullEnvLogData();
     server.close(() => console.log("Server has been disconnected"));

@@ -31,7 +31,19 @@ class AutomationModel {
     // router.get("/device/:deviceId", asyncHandler(AutomationController.getAutomationByDeviceId));
     static getAutomationByDeviceId(deviceId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios WHERE device_id = $1", [deviceId]);
+            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios a  WHERE device_id = $1", [deviceId]);
+            return automation.rows;
+        });
+    }
+    static getAutomationByFeedKey(feed_key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const automation = yield initDatabase_1.default.query("select a.* from devices d join automation_scenarios a on a.device_id = d.id  where d.feed_key = $1", [feed_key]);
+            return automation.rows[0];
+        });
+    }
+    static getAutomationByCategory(category) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios WHERE category = $1", [category]);
             return automation.rows;
         });
     }
@@ -56,9 +68,9 @@ class AutomationModel {
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
     static createAutomation(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, description, action, isActive }) {
-            const result = yield initDatabase_1.default.query(`INSERT INTO automation_scenarios (device_id, name, low, high, description, action, is_active)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [deviceId, name, low, high, description, action, isActive]);
+        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, action, isActive, category }) {
+            const result = yield initDatabase_1.default.query(`INSERT INTO automation_scenarios (device_id, name, low, high, action, is_active,category)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [deviceId, name, low, high, action, isActive, category]);
             return result.rows[0];
         });
     }
