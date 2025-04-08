@@ -9,7 +9,7 @@ class AccessController {
         console.log("AccessController::SignUp", req.body);
 
         const { username, email, password } = req.body;
-        
+    
         return new Created({
             message: "User created successfully",
             data: await AccessService.SignUp({

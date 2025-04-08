@@ -1,9 +1,9 @@
 import * as mqtt from "mqtt";
 import dotenv from "dotenv";
 import axios from "axios";
-import { BadRequestError } from "../helper/errorRespone";
-import { Feed } from "../model/device/device";
-import DeviceService from "./device.service";
+import { BadRequestError } from "../../helper/errorRespone";
+import { Feed } from "../../model/device/device";
+import DeviceService from "../device.service";
 import { EventEmitter } from "events";
 
 dotenv.config();
@@ -12,9 +12,10 @@ export class AdafruitService extends EventEmitter {
     public username: string;
     public aioKey: string;
     private baseUrl: string;
-    private client: mqtt.MqttClient | null;
+    private client: mqtt.MqttClient;
     private dashboardId: string;
     private messageHandlers: { [topic: string]: (topic: string, message: string) => void } = {};
+    private static instance: AdafruitService | null = null;
 
     constructor() {
         super();
@@ -22,16 +23,20 @@ export class AdafruitService extends EventEmitter {
         this.aioKey = process.env.ADAFRUIT_IO_KEY || "";
         this.baseUrl = "mqtts://io.adafruit.com";
         this.dashboardId = "dashboards";
-        this.client = null;
-    }
-
-    // Establishes connection with Adafruit IO using MQTT
-    public async connect(): Promise<void> {
         this.client = mqtt.connect(this.baseUrl, {
             username: this.username,
             password: this.aioKey
         });
+    }
+    public static getInstance() {
+        if (!AdafruitService.instance) {
+            AdafruitService.instance = new AdafruitService();
+        }
+        return AdafruitService.instance;
+    }
 
+    // Establishes connection with Adafruit IO using MQTT
+    public async connect(): Promise<void> {
         this.client.on("connect", () => {
             console.log("Connected to Adafruit IO MQTT");
         });
@@ -58,6 +63,14 @@ export class AdafruitService extends EventEmitter {
         }
     }
 
+    static async pullEnvLogData() {
+        setInterval(async () => {
+            // call the adafruit api to get the data
+            // save the data to the database
+            //this.createLog(data)
+        }, 10000);
+    }
+
     // Subscribe to a specific feed topic
     public subscribe(feed: string, messageHandler: (topic: string, message: string) => void): void {
         if (!this.client) {
@@ -74,7 +87,7 @@ export class AdafruitService extends EventEmitter {
         });
 
         // If there are no listeners for the "message" event, add one
-        if(!this.client.listenerCount("message")) {
+        if (!this.client.listenerCount("message")) {
             this.client.on("message", (receivedTopic: string, message: Buffer) => {
                 console.log(`Received message on topic ${receivedTopic}:`, message.toString());
                 if (this.messageHandlers[receivedTopic]) {
@@ -86,7 +99,6 @@ export class AdafruitService extends EventEmitter {
         }
         // Add the message handler for this topic
         this.messageHandlers[topic] = messageHandler;
-        
     }
 
     // Publish a message to a specific feed topic
@@ -164,6 +176,15 @@ export class AdafruitService extends EventEmitter {
             });
     }
 
+    public async getAllBlocks(): Promise<any> {
+        const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/${this.dashboardId}/welcome-dashboard/blocks`;
+        return await axios.get(blockEndpoint, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+
     public async getAllFeeds(): Promise<any> {
         return await axios.get(`https://io.adafruit.com/api/v2/${this.username}/feeds`, {
             headers: {
@@ -174,6 +195,35 @@ export class AdafruitService extends EventEmitter {
 
     public async getFeed(feedId: string): Promise<any> {
         return await axios.get(`https://io.adafruit.com/api/v2/${this.username}/feeds/${feedId}`, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+
+    public async deleteBlockByName(blockname: string): Promise<any> {
+        const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/${this.dashboardId}/welcome-dashboard/blocks/${blockname}`;
+
+        return await axios.delete(blockEndpoint, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+    public async deleteBlockById(blockid: string): Promise<any> {
+        console.log("Deleting block with ID:", blockid);
+        const blockEndpoint = `https://io.adafruit.com/api/v2/${this.username}/${this.dashboardId}/welcome-dashboard/blocks/${blockid}`;
+
+        return await axios.delete(blockEndpoint, {
+            headers: {
+                "X-AIO-Key": this.aioKey
+            }
+        });
+    }
+
+    public async deleteFeedById(feedId: string): Promise<any> {
+        console.log("Deleting feed with ID:", feedId);
+        return await axios.delete(`https://io.adafruit.com/api/v2/${this.username}/feeds/${feedId}`, {
             headers: {
                 "X-AIO-Key": this.aioKey
             }
@@ -191,17 +241,16 @@ export class AdafruitService extends EventEmitter {
                     // 3) Find the device ID for this feed
                     const deviceId = await DeviceService.getDeviceIdByFeed(feed.key);
 
-                    // 4) Log to DB 
+                    // 4) Log to DB
                     // TODO: LOG ONLY IF THE DEVICE TYPE IS "gauge"
                     if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
                         const EnvLogService = require("../services/envLog.service").default;
-    
+
                         // await EnvLogService.createLog({
                         //     deviceId: deviceId.id,
                         //     value: parseInt(latest, 10)
                         // });
                     }
-                    
                 }
                 console.log("Data pulled successfully from all feeds.");
             } catch (error: any) {

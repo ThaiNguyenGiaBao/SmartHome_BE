@@ -6,13 +6,7 @@ let db: any;
 // Create a new pool instance
 try {
     db = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: {
-            rejectUnauthorized: false // Required for Neon Tech
-        },
-        port: 5423,
-        idleTimeoutMillis: 20000,
-        connectionTimeoutMillis: 20000,
+
     });
 } catch (err: any) {
     console.log("Error in creating pool", err.message);
@@ -24,7 +18,5 @@ db.connect()
     .catch((err: any) => {
         console.error("Connection error", err.stack);
     });
-
-
 
 export default db;

@@ -10,7 +10,8 @@ export default class EnvLogService {
       }
       return EnvLogModel.createLog(data);
     }
-  
+    
+    
     static async getLogById(id: string) {
       if (!checkUUID(id)) {
         throw new BadRequestError("Invalid Log ID.");

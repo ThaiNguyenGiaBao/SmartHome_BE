@@ -10,10 +10,7 @@ let db;
 // Create a new pool instance
 try {
     db = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: {
-            rejectUnauthorized: false // Required for Neon Tech
-        }
+        connectionString: process.env.DATABASE_URL
     });
 }
 catch (err) {

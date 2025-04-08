@@ -12,37 +12,24 @@ CREATE TABLE users (
 );
 
 -- 2) DEVICES TABLE
-CREATE TYPE device_status AS ENUM ('on', 'off', 'inactive');
 
 CREATE TABLE devices (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id     UUID NOT NULL,
-    name        VARCHAR(100) NOT NULL,
+    name        VARCHAR(100) UNIQUE NOT NULL, -- Map to the device name - block name
     type        VARCHAR(100) NOT NULL,
-    status      device_status DEFAULT 'off',
     room        VARCHAR(100),
-    feet        VARCHAR(100) NOT NULL,
+    feed_key        VARCHAR(100) UNIQUE  NOT NULL , -- Map to the device feedKey - feedKey
+    image_url   VARCHAR(255),
     CONSTRAINT fk_device_user
         FOREIGN KEY (user_id)
         REFERENCES users (id)
         ON DELETE CASCADE
 );
 
--- 3) DEVICE STATUS LOG TABLE
-CREATE TABLE device_status_log (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    device_id   UUID NOT NULL,
-    description TEXT,
-    timestamp   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_devicestatuslog_device
-        FOREIGN KEY (device_id)
-        REFERENCES devices (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
 
 -- 4) ENVIRONMENTAL LOG TABLE
-CREATE TABLE environmental_log (
+CREATE TABLE status_log (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     device_id   UUID NOT NULL,
     value       INT NOT NULL,
@@ -61,7 +48,7 @@ CREATE TABLE automation_scenarios (
     name        VARCHAR(100) NOT NULL,
     low         INT NOT NULL,
     high        INT NOT NULL,
-    description TEXT,
+    
     action      VARCHAR(100) NOT NULL,
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

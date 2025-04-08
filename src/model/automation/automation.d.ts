@@ -5,7 +5,6 @@ type Automation = {
     name: string;           // VARCHAR(100)
     low: number;            // INT
     high: number;           // INT
-    description?: string;   // TEXT, optional if nullable in your DB
     action: string;         // VARCHAR(100)
     isActive: boolean;      // BOOLEAN, default TRUE
     createdAt: Date;        // TIMESTAMP WITH TIME ZONE

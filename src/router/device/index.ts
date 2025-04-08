@@ -4,17 +4,21 @@ import DeviceController from "../../controllers/device.controller";
 
 const router = express.Router();
 
-router.get("/:id", asyncHandler(DeviceController.getDeviceById));
+router.get("/", (req, res) => {
+    res.json({ message: "Hello World" });
+});
 
-router.get("/user/:userId", asyncHandler(DeviceController.getDeviceByUserId));
+router.post("/", asyncHandler(DeviceController.createDevice));
+router.get("/async", asyncHandler(DeviceController.syncBlocksDatabaseAdafruitIo));
+
+router.get("/user", asyncHandler(DeviceController.getDeviceByUserId));
+
+router.get("/:id", asyncHandler(DeviceController.getDeviceById));
 
 router.patch("/:id", asyncHandler(DeviceController.updateDevice));
 router.delete("/:id", asyncHandler(DeviceController.deleteDevice));
 
-router.post("/", asyncHandler(DeviceController.createDevice));
-
 router.get("/state/:id", asyncHandler(DeviceController.getDeviceStateById));
-router.get("/state/current/:id", asyncHandler(DeviceController.getCurrentDeviceStateById));
 
 router.post("/control/:id", asyncHandler(DeviceController.updateDeviceStateById));
 

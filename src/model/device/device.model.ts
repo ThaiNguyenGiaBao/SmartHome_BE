@@ -1,5 +1,5 @@
 import db from "../../dbs/initDatabase";
-import { DeviceCreate, DeviceUpdate } from "./device";
+import { DeviceCreate, DeviceUpdate, Device } from "./device";
 
 class DeviceModel {
     // router.get("/:id", asyncHandler(DeviceController.getDeviceById));
@@ -7,6 +7,17 @@ class DeviceModel {
         const device = await db.query("SELECT * FROM devices WHERE id = $1", [id]);
         return device.rows[0];
     }
+
+    static async getDeviceByName(name: string) {
+        const device = await db.query("SELECT * FROM devices WHERE name = $1", [name]);
+        return device.rows[0];
+    }
+
+    static async getDeviceByBlockId(id: string) {
+        const device = await db.query("SELECT * FROM devices WHERE block_id = $1", [id]);
+        return device.rows[0];
+    }
+
     // router.get("/user/:userId", asyncHandler(DeviceController.getDeviceByUserId));
     static async getDeviceByUserId(userId: string) {
         const device = await db.query("SELECT * FROM devices WHERE user_id = $1", [userId]);
@@ -14,11 +25,11 @@ class DeviceModel {
     }
 
     // router.post("/", asyncHandler(DeviceController.createDevice));
-    static async createDevice({ user_id, name, type, status, room, feet }: DeviceCreate) {
+    static async createDevice({ user_id, name, type, room, feed_key, block_id }: DeviceCreate) {
         const result = await db.query(
-            `INSERT INTO devices (user_id, name, type, status, room, feet)
+            `INSERT INTO devices (user_id, name, type, room, feed_key, block_id)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [user_id, name, type, status, room, feet]
+            [user_id, name, type, room, feed_key, block_id]
         );
         return result.rows[0];
     }
@@ -40,11 +51,10 @@ class DeviceModel {
         return result.rows[0];
     }
 
-    static async getDeviceIdByFeed(feedId: string) {
-        const device = await db.query("SELECT id FROM devices WHERE feet = $1", [feedId]);
+    static async getDeviceIdByFeed(feed_key: string) {
+        const device = await db.query("SELECT id FROM devices WHERE feed_key = $1", [feed_key]);
         return device.rows[0];
     }
-
 }
 
 export default DeviceModel;

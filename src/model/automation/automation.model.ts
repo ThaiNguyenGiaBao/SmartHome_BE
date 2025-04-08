@@ -38,11 +38,11 @@ class AutomationModel {
     }
 
     // router.post("/", asyncHandler(AutomationController.createAutomation));
-    static async createAutomation({ deviceId, name, low, high, description, action, isActive }: AutomationCreate) {
+    static async createAutomation({ deviceId, name, low, high, action, isActive }: AutomationCreate) {
         const result = await db.query(
-            `INSERT INTO automation_scenarios (device_id, name, low, high, description, action, is_active)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [deviceId, name, low, high, description, action, isActive]
+            `INSERT INTO automation_scenarios (device_id, name, low, high, action, is_active)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [deviceId, name, low, high, action, isActive]
         );
         return result.rows[0];
     }
