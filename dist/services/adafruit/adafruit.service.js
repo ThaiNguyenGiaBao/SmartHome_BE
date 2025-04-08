@@ -64,8 +64,9 @@ class AdafruitService extends events_1.EventEmitter {
                 return;
             }
             const category = device.category;
-            console.log("Device category:", category);
-            this.emit(category, { room: device.room, deviceId: device.id, value: parsedMessage });
+            const data = { room: device.room, rawValue: parsedMessage };
+            //console.log("Device category:", category);
+            this.emit(category, data);
         }));
     }
     static getInstance() {

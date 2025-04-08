@@ -22,7 +22,7 @@ class Subject {
     listen() {
         const adafruitService = adafruit_service_1.default.getInstance();
         adafruitService.on(this.category, (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log("Data received in Subject:", data);
+            console.log("Data received in Subject:", this.category);
             yield this.notify(data);
         }));
     }
@@ -33,6 +33,7 @@ class Subject {
             const automationList = yield automation_model_1.default.getAutomationByCategory(this.category);
             for (const automation of automationList) {
                 const { low, high, action } = automation;
+                console.log(low, high, value);
                 if (value < low || value > high) {
                     continue;
                 }
