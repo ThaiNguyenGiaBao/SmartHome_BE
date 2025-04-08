@@ -14,13 +14,16 @@ declare global {
 }
 
 const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.token;
-    if (!token) {
+    const accessToken = req.headers["authorization"]?.split(" ")[1];
+    
+    if (!accessToken) {
         throw new UnauthorizedError("No token provided");
     }
-
-    jwt.verify(token, process.env.JWT_SECRET || "secret", async (err: jwt.VerifyErrors | null, member: any) => {
+    jwt.verify(accessToken, process.env.JWT_SECRET || "secret", async (err: jwt.VerifyErrors | null, member: any) => {
         if (err) {
+            if (err.name === "TokenExpiredError") {
+                throw new UnauthorizedError("Token expired");
+            }
             throw new UnauthorizedError("Invalid token");
         }
 

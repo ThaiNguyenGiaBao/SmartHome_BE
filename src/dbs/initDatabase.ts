@@ -9,7 +9,10 @@ try {
         connectionString: process.env.DATABASE_URL,
         ssl: {
             rejectUnauthorized: false // Required for Neon Tech
-        }
+        },
+        port: 5423,
+        idleTimeoutMillis: 20000,
+        connectionTimeoutMillis: 20000,
     });
 } catch (err: any) {
     console.log("Error in creating pool", err.message);

@@ -1,10 +1,8 @@
 import express from "express";
 import { asyncHandler } from "../../utils";
-import { authenticateToken } from "../../middlewares/auth.middlewares";
 import UserController from "../../controllers/user.controller";
 
 const router = express.Router();
-router.use(asyncHandler(authenticateToken));
 
 router.get("/me", asyncHandler(UserController.getMe));
 
