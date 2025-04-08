@@ -7,11 +7,17 @@ import router from "./router/index";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import AdafruitService from "./services/adafruit/adafruit.service";
-
+import Subject from "./services/Observer/subject";
 
 export const adafruitService = AdafruitService.getInstance();
 adafruitService.connect();
 
+const smokeSubject = new Subject("smoke");
+smokeSubject.listen();
+const lightSubject = new Subject("light");
+lightSubject.listen();
+const fireSubject = new Subject("fire");
+fireSubject.listen();
 
 const app = express();
 
