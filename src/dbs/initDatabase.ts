@@ -6,7 +6,7 @@ let db: any;
 // Create a new pool instance
 try {
     db = new Pool({
-
+        connectionString: process.env.DATABASE_URL
     });
 } catch (err: any) {
     console.log("Error in creating pool", err.message);

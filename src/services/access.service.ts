@@ -8,8 +8,8 @@ dotenv.config();
 
 import { User } from "../model/user/user";
 
-const ACCESS_TOKEN_EXPIRATION = "10m";
-const REFRESH_TOKEN_EXPIRATION = "3d";
+const ACCESS_TOKEN_EXPIRATION = "5000"; // 5 seconds
+const REFRESH_TOKEN_EXPIRATION = "1m";  // 1 minute (all for testing purposes)
 
 class AccessService {
     static async SignUp({ username, email, password }: User) {
@@ -39,7 +39,7 @@ class AccessService {
         if (!email || !password) {
             throw new BadRequestError("Email and password are required");
         }
-        console.log("AccessService::SignIn", email);
+
         const user = await userModel.findUserByEmail(email);
         if (!user) {
             throw new NotFoundError("User not found");
@@ -88,6 +88,7 @@ class AccessService {
             const accessToken = jwt.sign(
                 { id: user.id, role: user.role },
                 process.env.JWT_SECRET || "secret",
+                { expiresIn: ACCESS_TOKEN_EXPIRATION }
             );
             return { accessToken };
         }
