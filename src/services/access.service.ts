@@ -1,12 +1,15 @@
 import { BadRequestError, ForbiddenError, NotFoundError } from "../helper/errorRespone";
-import db from "../dbs/initDatabase";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import userModel from "../model/user/user.model";
+
 dotenv.config();
 
 import { User } from "../model/user/user";
+
+const ACCESS_TOKEN_EXPIRATION = "5000"; // 5 seconds
+const REFRESH_TOKEN_EXPIRATION = "1m";  // 1 minute (all for testing purposes)
 
 class AccessService {
     static async SignUp({ username, email, password }: User) {
@@ -36,21 +39,61 @@ class AccessService {
         if (!email || !password) {
             throw new BadRequestError("Email and password are required");
         }
-        console.log("AccessService::SignIn", email);
+
         const user = await userModel.findUserByEmail(email);
         if (!user) {
             throw new NotFoundError("User not found");
         }
 
         if (await bcrypt.compare(password, user.password)) {
-            const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || "secret");
+            const accessToken = jwt.sign(
+                { id: user.id, role: user.role }, 
+                process.env.JWT_SECRET || "secret",
+                { expiresIn: ACCESS_TOKEN_EXPIRATION }
+            );
+            const refreshToken = jwt.sign(
+                { id: user.id, role: user.role }, 
+                process.env.JWT_REFRESH_TOKEN_SECRET || "verysecret",
+                { expiresIn: REFRESH_TOKEN_EXPIRATION }
+            );
             delete user.password;
             return {
                 ...user,
-                accessToken
+                accessToken,
+                refreshToken
             };
         } else {
             throw new ForbiddenError("Invalid password");
+        }
+    }
+
+    static async SignOut(): Promise<void> {
+        return;
+    }
+
+    static async RefreshToken(refreshToken: string) : Promise<{accessToken: string}> {
+        if (!refreshToken) {
+            throw new BadRequestError("Refresh token is required");
+        }
+        try {
+            const payload = jwt.verify(
+                refreshToken,
+                process.env.JWT_REFRESH_TOKEN_SECRET || "verysecret"
+            ) as { id: string; role: string };
+
+            const user = await userModel.findUserById(payload.id);
+            if (!user) {
+                throw new NotFoundError("User not found");
+            }
+            const accessToken = jwt.sign(
+                { id: user.id, role: user.role },
+                process.env.JWT_SECRET || "secret",
+                { expiresIn: ACCESS_TOKEN_EXPIRATION }
+            );
+            return { accessToken };
+        }
+        catch (error) {
+            throw new ForbiddenError("Invalid refresh token");
         }
     }
 }

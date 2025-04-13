@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { UnauthorizedError } from "../helper/errorRespone";
 import { Request, Response, NextFunction } from "express";
 
 declare global {
@@ -14,14 +13,17 @@ declare global {
 }
 
 const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.token;
-    if (!token) {
-        throw new UnauthorizedError("No token provided");
+    const accessToken = req.headers["authorization"]?.split(" ")[1];
+    
+    if (!accessToken) {
+        return res.status(401).json({ message: "Access token is required" });
     }
-
-    jwt.verify(token, process.env.JWT_SECRET || "secret", async (err: jwt.VerifyErrors | null, member: any) => {
+    jwt.verify(accessToken, process.env.JWT_SECRET || "secret", async (err: jwt.VerifyErrors | null, member: any) => {
         if (err) {
-            throw new UnauthorizedError("Invalid token");
+            if (err.name === "TokenExpiredError") {
+                return res.status(401).json({ message: "Token expired" }); 
+            }
+            return res.status(401).json({ message: "Invalid token" });
         }
 
         req.user = member as { id: string; role: string };

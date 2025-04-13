@@ -1,10 +1,8 @@
 import express from "express";
 import { asyncHandler } from "../../utils";
-import { authenticateToken } from "../../middlewares/auth.middlewares";
 import DeviceController from "../../controllers/device.controller";
 
 const router = express.Router();
-router.use(asyncHandler(authenticateToken));
 
 router.get("/", (req, res) => {
     res.json({ message: "Hello World" });
