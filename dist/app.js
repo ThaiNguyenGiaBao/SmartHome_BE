@@ -21,6 +21,15 @@ const lightSubject = new subject_1.default("light");
 lightSubject.listen();
 const fireSubject = new subject_1.default("fire");
 fireSubject.listen();
+const hourSubject = new subject_1.default("hour");
+hourSubject.listen();
+// setInterval(() => {
+//     const currentHour = new Date().getHours();
+//     // convert hour to floating point number
+//     const currentHourFloat = parseFloat(currentHour.toString());
+//     console.log("Current hour:", currentHourFloat);
+//     hourSubject.notify({ room: "all", rawValue: currentHour });
+// }, 1000); // every hour
 const app = (0, express_1.default)();
 // init middleware
 app.use((0, morgan_1.default)("dev"));

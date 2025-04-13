@@ -8,9 +8,11 @@ const access_controller_1 = __importDefault(require("../../controllers/access.co
 const utils_1 = require("../../utils");
 const auth_middlewares_1 = require("../../middlewares/auth.middlewares");
 const router = express_1.default.Router();
-router.post("/signup", (0, utils_1.asyncHandler)(access_controller_1.default.SignUp));
 router.post("/signin", (0, utils_1.asyncHandler)(access_controller_1.default.SignIn));
+router.post("/signup", (0, utils_1.asyncHandler)(access_controller_1.default.SignUp));
+router.post("/refresh", (0, utils_1.asyncHandler)(access_controller_1.default.RefreshToken));
 router.use((0, utils_1.asyncHandler)(auth_middlewares_1.authenticateToken));
+router.post("/signout", (0, utils_1.asyncHandler)(access_controller_1.default.SignOut));
 // /api/auth/
 router.get("/", (req, res) => {
     res.json({ message: "Hello World" });

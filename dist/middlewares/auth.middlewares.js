@@ -14,15 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const errorRespone_1 = require("../helper/errorRespone");
 const authenticateToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.cookies.token;
-    if (!token) {
-        throw new errorRespone_1.UnauthorizedError("No token provided");
+    var _a;
+    const accessToken = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+    if (!accessToken) {
+        return res.status(401).json({ message: "Access token is required" });
     }
-    jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || "secret", (err, member) => __awaiter(void 0, void 0, void 0, function* () {
+    jsonwebtoken_1.default.verify(accessToken, process.env.JWT_SECRET || "secret", (err, member) => __awaiter(void 0, void 0, void 0, function* () {
         if (err) {
-            throw new errorRespone_1.UnauthorizedError("Invalid token");
+            if (err.name === "TokenExpiredError") {
+                return res.status(401).json({ message: "Token expired" });
+            }
+            return res.status(401).json({ message: "Invalid token" });
         }
         req.user = member;
         console.log("User authenticated::", req.user);

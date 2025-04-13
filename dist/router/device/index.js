@@ -5,10 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const utils_1 = require("../../utils");
-const auth_middlewares_1 = require("../../middlewares/auth.middlewares");
 const device_controller_1 = __importDefault(require("../../controllers/device.controller"));
 const router = express_1.default.Router();
-router.use((0, utils_1.asyncHandler)(auth_middlewares_1.authenticateToken));
 router.get("/", (req, res) => {
     res.json({ message: "Hello World" });
 });

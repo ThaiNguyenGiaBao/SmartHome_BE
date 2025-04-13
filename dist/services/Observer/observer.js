@@ -18,7 +18,7 @@ class DeviceObserver {
     static update(_a) {
         return __awaiter(this, arguments, void 0, function* ({ room, device_id, action }) {
             const device = yield device_model_1.default.getDeviceById(device_id);
-            if (device && device.room === room) {
+            if (room == "all" || (device && device.room === room)) {
                 console.log("Automation triggered on device:: ", device.name);
                 device_service_1.default.updateDeviceStateById(device.id, action);
             }

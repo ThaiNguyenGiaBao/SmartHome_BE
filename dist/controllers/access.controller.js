@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const access_service_1 = __importDefault(require("../services/access.service"));
 const successResponse_1 = require("../helper/successResponse");
+const errorRespone_1 = require("../helper/errorRespone");
 class AccessController {
     static SignUp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -33,9 +34,32 @@ class AccessController {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("AccessController::SignIn", req.body);
             const data = yield access_service_1.default.SignIn(req.body);
-            res.cookie("token", data.accessToken, { httpOnly: true, secure: true, sameSite: "none" });
             return new successResponse_1.OK({
                 message: "User signed in successfully",
+                data: data
+            }).send(res);
+        });
+    }
+    static SignOut(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("AccessController::SignOut", req.body);
+            yield access_service_1.default.SignOut();
+            return new successResponse_1.OK({
+                message: "User signed out successfully",
+                data: null
+            }).send(res);
+        });
+    }
+    static RefreshToken(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("AccessController::RefreshToken", req.body);
+            const refreshToken = req.body.refreshToken;
+            if (!refreshToken) {
+                throw new errorRespone_1.BadRequestError("Refresh token is required");
+            }
+            const data = yield access_service_1.default.RefreshToken(refreshToken);
+            return new successResponse_1.OK({
+                message: "Token refreshed successfully",
                 data: data
             }).send(res);
         });
