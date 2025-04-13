@@ -11,7 +11,7 @@ type DataObserver = {
 class DeviceObserver {
     static async update({ room, device_id, action }: DataObserver) {
         const device = await DeviceModel.getDeviceById(device_id);
-        if (device && device.room === room) {
+        if (room == "all" || (device && device.room === room)) {
             console.log("Automation triggered on device:: ", device.name);
             DeviceService.updateDeviceStateById(device.id, action);
         }

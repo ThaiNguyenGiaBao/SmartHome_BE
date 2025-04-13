@@ -14,10 +14,22 @@ adafruitService.connect();
 
 const smokeSubject = new Subject("smoke");
 smokeSubject.listen();
+
 const lightSubject = new Subject("light");
 lightSubject.listen();
 const fireSubject = new Subject("fire");
 fireSubject.listen();
+
+const hourSubject = new Subject("hour");
+hourSubject.listen();
+
+// setInterval(() => {
+//     const currentHour = new Date().getHours();
+//     // convert hour to floating point number
+//     const currentHourFloat = parseFloat(currentHour.toString());
+//     console.log("Current hour:", currentHourFloat);
+//     hourSubject.notify({ room: "all", rawValue: currentHour });
+// }, 1000); // every hour
 
 const app = express();
 
