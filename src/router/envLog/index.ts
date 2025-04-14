@@ -4,7 +4,7 @@ import EnvLogController from "../../controllers/envLog.controller";
 
 const router = express.Router();
 
-router.post("/", asyncHandler(EnvLogController.createLog));
+router.post("/" , asyncHandler(EnvLogController.createLog));
 router.get("/:id", asyncHandler(EnvLogController.getLogById));
 router.get("/", asyncHandler(EnvLogController.getAllLogs));
 router.patch("/update/:id", asyncHandler(EnvLogController.updateLog));
