@@ -8,10 +8,12 @@ const router = express.Router();
 router.post("/signin", asyncHandler(AccessController.SignIn));
 router.post("/signup", asyncHandler(AccessController.SignUp));
 router.post("/refresh", asyncHandler(AccessController.RefreshToken));
+router.get("/verify", asyncHandler(AccessController.VerifyToken));
 
 router.use(asyncHandler(authenticateToken));
 
 router.post("/signout", asyncHandler(AccessController.SignOut));
+
 
 
 // /api/auth/
