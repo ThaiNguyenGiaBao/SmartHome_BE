@@ -55,6 +55,23 @@ class AccessController {
             data: data
         }).send(res);
     }
+
+    static async VerifyToken(req: Request, res: Response) {
+        console.log("AccessController::VerifyToken", req.body);
+        const token = req.headers["authorization"]?.split(" ")[1];
+        
+        if (!token) {
+            throw new BadRequestError("Token is required");
+        }
+        
+        const data = await AccessService.VerifyToken(token);
+
+        return new OK({
+            message: "Token verified successfully",
+            data: data
+        }).send(res);
+    }
+
 }
 
 export default AccessController;

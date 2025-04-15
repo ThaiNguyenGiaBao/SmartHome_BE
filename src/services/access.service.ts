@@ -8,8 +8,8 @@ dotenv.config();
 
 import { User } from "../model/user/user";
 
-const ACCESS_TOKEN_EXPIRATION = "5000"; // 5 seconds
-const REFRESH_TOKEN_EXPIRATION = "1m";  // 1 minute (all for testing purposes)
+const ACCESS_TOKEN_EXPIRATION = "10m"; // 10 minutes (all for testing purposes)
+const REFRESH_TOKEN_EXPIRATION = "1d";  // 1 day (all for testing purposes)
 
 class AccessService {
     static async SignUp({ username, email, password }: User) {
@@ -94,6 +94,21 @@ class AccessService {
         }
         catch (error) {
             throw new ForbiddenError("Invalid refresh token");
+        }
+    }
+
+    static async VerifyToken(token: string) {
+        if (!token) {
+            throw new BadRequestError("Token is required");
+        }
+        try {
+            const payload = jwt.verify(
+                token,
+                process.env.JWT_SECRET || "secret"
+            ) as { id: string; role: string };
+            return payload;
+        } catch (error) {
+            throw new ForbiddenError("Invalid token");
         }
     }
 }
