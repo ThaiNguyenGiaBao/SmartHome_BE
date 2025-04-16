@@ -8,7 +8,7 @@ dotenv.config();
 
 import { User } from "../model/user/user";
 
-const ACCESS_TOKEN_EXPIRATION = "1d"; // 1 hour (all for testing purposes)
+const ACCESS_TOKEN_EXPIRATION = "1h"; // 1 hour (all for testing purposes)
 const REFRESH_TOKEN_EXPIRATION = "1d";  // 1 day (all for testing purposes)
 
 class AccessService {

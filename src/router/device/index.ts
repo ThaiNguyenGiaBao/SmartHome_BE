@@ -12,6 +12,7 @@ router.post("/", asyncHandler(DeviceController.createDevice));
 router.get("/async", asyncHandler(DeviceController.syncBlocksDatabaseAdafruitIo));
 
 router.get("/user", asyncHandler(DeviceController.getDeviceByUserId));
+router.get("/allrooms", asyncHandler(DeviceController.getAllUniqueRooms));
 
 router.get("/:id", asyncHandler(DeviceController.getDeviceById));
 

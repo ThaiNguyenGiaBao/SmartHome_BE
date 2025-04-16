@@ -1,8 +1,6 @@
 import * as mqtt from "mqtt";
 import dotenv from "dotenv";
-import axios from "axios";
 import { BadRequestError } from "../../helper/errorRespone";
-import { Feed } from "../../model/device/device";
 import DeviceService from "../device.service";
 import { EventEmitter } from "events";
 import DeviceModel from "../../model/device/device.model";
@@ -16,6 +14,8 @@ export class AdafruitService extends EventEmitter {
     private baseUrl: string;
     private client: mqtt.MqttClient;
     private static instance: AdafruitService | null = null;
+    private subscribedTopics: Set<string> = new Set();
+    private isConnected: boolean = false;
 
     constructor() {
         super();
@@ -24,21 +24,9 @@ export class AdafruitService extends EventEmitter {
         this.baseUrl = "mqtts://io.adafruit.com";
         this.client = mqtt.connect(this.baseUrl, {
             username: this.username,
-            password: this.aioKey
-        });
-        this.client.on("message", async (receivedTopic: string, message: Buffer) => {
-            const parsedMessage = message.toString();
-            console.log(`Received message on topic ${receivedTopic}:`, parsedMessage);
-
-            const device = await DeviceModel.getDeviceByFeedKey(receivedTopic.split("/")[2]);
-            if (!device) {
-                console.log("Device not found for topic:", receivedTopic);
-                return;
-            }
-            const category = device.category;
-            const data: DataObserver = { room: device.room, rawValue: parsedMessage };
-            //console.log("Device category:", category);
-            this.emit(category, data);
+            password: this.aioKey,
+            clientId: `smarthome_${Date.now()}_${Math.random().toString(16).substring(2, 8)}`,
+            clean: true,
         });
     }
 
@@ -51,20 +39,77 @@ export class AdafruitService extends EventEmitter {
 
     // Establishes connection with Adafruit IO using MQTT
     public async connect(): Promise<void> {
-        this.client.on("connect", () => {
-            console.log("Connected to Adafruit IO MQTT");
-        });
+        if (!this.isConnected) {
+            this.client.on("connect", () => {
+                console.log("Connected to Adafruit IO MQTT");
+                this.isConnected = true;
+            });
 
-        this.client.on("error", (error: Error) => {
-            console.error("Connection error:", error);
-            if (this.client) {
-                this.client.end();
-            }
-        });
+            this.client.on("error", (error: Error) => {
+                console.error("Connection error:", error);
+                if (this.client) {
+                    this.client.end();
+                }
+            });
 
-        this.client.on("close", () => {
-            console.log("Disconnected from Adafruit IO MQTT");
-        });
+            this.client.on("close", () => {
+                console.log("Disconnected from Adafruit IO MQTT");
+            });
+
+            this.client.on("message", async (receivedTopic: string, message: Buffer) => {
+                const parsedMessage = message.toString();
+                console.log(`Received message on topic ${receivedTopic}:`, parsedMessage);
+
+                const device = await DeviceModel.getDeviceByFeedKey(receivedTopic.split("/")[2]);
+                if (!device) {
+                    console.log("Device not found for topic:", receivedTopic);
+                    return;
+                }
+
+                const category = device.category;
+                const data: DataObserver = { room: device.room, rawValue: parsedMessage };
+                this.emit("newReading", category, data);
+
+                // const getRandomValue = (min: number, max: number): number => {
+                //     return Math.round((Math.random() * (max - min) + min) * 10) / 10; // Làm tròn đến 1 chữ số thập phân
+                // };
+                // // Test data set
+                // const testData = [
+                //     { category: "temperature", data: { room: "Living Room", rawValue: getRandomValue(1,200) } },
+                //     { category: "humidity", data: { room: "Living Room", rawValue: getRandomValue(1,200) } },
+                //     { category: "light", data: { room: "Living Room", rawValue: getRandomValue(1,200) } },
+                //     { category: "temperature", data: { room: "Bedroom", rawValue: getRandomValue(1,200) } },
+                //     { category: "humidity", data: { room: "Bedroom", rawValue: getRandomValue(1,200) } },
+                //     { category: "temperature", data: { room: "Kitchen", rawValue: getRandomValue(1,200) } },
+                //     { category: "co2", data: { room: "Living Room", rawValue: getRandomValue(1,200) } }
+                // ];
+                
+                // testData.forEach(item => {
+                //     console.log(`Emitting new reading for ${item.category}:`, item.data);
+                //     var hasEmited = this.emit("newReading", item.category, item.data);
+                //     if (!hasEmited) {
+                //         console.log("No listeners for newReading event.");
+                //     }
+                // });
+            });
+        }
+
+        // Wait for connection to be established
+        if (!this.client.connected) {
+            await new Promise<void>((resolve) => {
+                const connectHandler = () => {
+                    this.client.removeListener('connect', connectHandler);
+                    resolve();
+                };
+                this.client.on('connect', connectHandler);
+                
+                // Add timeout to prevent hanging if connection fails
+                setTimeout(() => {
+                    this.client.removeListener('connect', connectHandler);
+                    resolve(); // Resolve anyway after timeout
+                }, 5000);
+            });
+        }
 
         // subcribe to all current feeds
         const feeds = await FeedService.getAllFeeds();
@@ -92,6 +137,12 @@ export class AdafruitService extends EventEmitter {
             return;
         }
         const topic = `${this.username}/feeds/${feed}`;
+
+        if (this.subscribedTopics.has(topic)) {
+            console.log(`Already subscribed to ${topic}, skipping`);
+            return;
+        }
+
         this.client.subscribe(topic, (err: any) => {
             if (err) {
                 console.error(`Subscription error on topic ${topic}:`, err);
@@ -99,6 +150,9 @@ export class AdafruitService extends EventEmitter {
                 console.log(`Subscribed to ${topic}`);
             }
         });
+
+        this.subscribedTopics.add(topic);
+
     }
 
     // Publish a message to a specific feed topic
@@ -125,7 +179,9 @@ export class AdafruitService extends EventEmitter {
     // Disconnect from the MQTT broker
     public disconnect(): void {
         if (this.client) {
-            this.client.end();
+            this.client.removeAllListeners(); 
+            this.client.end(true); 
+            this.isConnected = false;
             console.log("Client disconnected");
         }
     }
