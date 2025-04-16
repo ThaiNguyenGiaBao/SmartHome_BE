@@ -172,5 +172,14 @@ class DeviceService {
             return device;
         });
     }
+    static getAllUniqueRooms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const rooms = yield device_model_1.default.getAllUniqueRooms();
+            if (!rooms) {
+                throw new errorRespone_1.NotFoundError("No devices found");
+            }
+            return rooms;
+        });
+    }
 }
 exports.default = DeviceService;

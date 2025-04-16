@@ -11,6 +11,7 @@ const router = express_1.default.Router();
 router.post("/signin", (0, utils_1.asyncHandler)(access_controller_1.default.SignIn));
 router.post("/signup", (0, utils_1.asyncHandler)(access_controller_1.default.SignUp));
 router.post("/refresh", (0, utils_1.asyncHandler)(access_controller_1.default.RefreshToken));
+router.get("/verify", (0, utils_1.asyncHandler)(access_controller_1.default.VerifyToken));
 router.use((0, utils_1.asyncHandler)(auth_middlewares_1.authenticateToken));
 router.post("/signout", (0, utils_1.asyncHandler)(access_controller_1.default.SignOut));
 // /api/auth/

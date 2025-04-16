@@ -64,5 +64,20 @@ class AccessController {
             }).send(res);
         });
     }
+    static VerifyToken(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            console.log("AccessController::VerifyToken", req.body);
+            const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+            if (!token) {
+                throw new errorRespone_1.BadRequestError("Token is required");
+            }
+            const data = yield access_service_1.default.VerifyToken(token);
+            return new successResponse_1.OK({
+                message: "Token verified successfully",
+                data: data
+            }).send(res);
+        });
+    }
 }
 exports.default = AccessController;

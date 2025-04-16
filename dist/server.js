@@ -21,11 +21,15 @@ exports.io = new socket_io_1.Server(server, {
 });
 exports.io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
+    app_2.adafruitService.on("newReading", (category, data) => {
+        socket.emit("newReading", category, data);
+    });
     socket.on("disconnect", () => {
         console.log("Socket disconnected:", socket.id);
     });
 });
 process.on("SIGINT", () => {
     app_2.adafruitService.stopPullEnvLogData();
+    app_2.adafruitService.disconnect();
     server.close(() => console.log("Server has been disconnected"));
 });

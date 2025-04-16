@@ -13,6 +13,7 @@ router.get("/", (req, res) => {
 router.post("/", (0, utils_1.asyncHandler)(device_controller_1.default.createDevice));
 router.get("/async", (0, utils_1.asyncHandler)(device_controller_1.default.syncBlocksDatabaseAdafruitIo));
 router.get("/user", (0, utils_1.asyncHandler)(device_controller_1.default.getDeviceByUserId));
+router.get("/allrooms", (0, utils_1.asyncHandler)(device_controller_1.default.getAllUniqueRooms));
 router.get("/:id", (0, utils_1.asyncHandler)(device_controller_1.default.getDeviceById));
 router.patch("/:id", (0, utils_1.asyncHandler)(device_controller_1.default.updateDevice));
 router.delete("/:id", (0, utils_1.asyncHandler)(device_controller_1.default.deleteDevice));

@@ -18,8 +18,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const user_model_1 = __importDefault(require("../model/user/user.model"));
 dotenv_1.default.config();
-const ACCESS_TOKEN_EXPIRATION = "5000"; // 5 seconds
-const REFRESH_TOKEN_EXPIRATION = "1m"; // 1 minute (all for testing purposes)
+const ACCESS_TOKEN_EXPIRATION = "1h"; // 1 hour (all for testing purposes)
+const REFRESH_TOKEN_EXPIRATION = "1d"; // 1 day (all for testing purposes)
 class AccessService {
     static SignUp(_a) {
         return __awaiter(this, arguments, void 0, function* ({ username, email, password }) {
@@ -84,6 +84,20 @@ class AccessService {
             }
             catch (error) {
                 throw new errorRespone_1.ForbiddenError("Invalid refresh token");
+            }
+        });
+    }
+    static VerifyToken(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!token) {
+                throw new errorRespone_1.BadRequestError("Token is required");
+            }
+            try {
+                const payload = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || "secret");
+                return payload;
+            }
+            catch (error) {
+                throw new errorRespone_1.ForbiddenError("Invalid token");
             }
         });
     }

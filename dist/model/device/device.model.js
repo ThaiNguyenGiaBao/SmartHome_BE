@@ -79,5 +79,12 @@ class DeviceModel {
             return device.rows[0];
         });
     }
+    static getAllUniqueRooms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield initDatabase_1.default.query("SELECT DISTINCT room FROM devices");
+            console.log("getAllUniqueRooms::", result.rows);
+            return result.rows;
+        });
+    }
 }
 exports.default = DeviceModel;
