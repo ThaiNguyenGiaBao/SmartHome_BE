@@ -21,6 +21,12 @@ export const io = new Server(server, {
 
 io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
+
+    adafruitService.on("newReading", (category, data) => {
+        socket.emit("newReading", category, data);
+    }
+    );
+
     socket.on("disconnect", () => {
         console.log("Socket disconnected:", socket.id);
     });
@@ -29,5 +35,6 @@ io.on("connection", (socket) => {
 
 process.on("SIGINT", () => {
     adafruitService.stopPullEnvLogData();
+    adafruitService.disconnect();
     server.close(() => console.log("Server has been disconnected"));
 });

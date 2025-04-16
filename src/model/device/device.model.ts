@@ -60,6 +60,12 @@ class DeviceModel {
         const device = await db.query("SELECT id FROM devices WHERE feed_key = $1", [feed_key]);
         return device.rows[0];
     }
+
+    static async getAllUniqueRooms() {
+        const result = await db.query("SELECT DISTINCT room FROM devices");
+        console.log("getAllUniqueRooms::", result.rows);
+        return result.rows;
+    }
 }
 
 export default DeviceModel;

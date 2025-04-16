@@ -75,6 +75,14 @@ class DeviceController {
             data: await DeviceService.deleteDevice(req.params.id)
         }).send(res);
     }
+
+    static async getAllUniqueRooms(req: Request, res: Response) {
+        console.log("DeviceController::getAllUniqueRooms");
+        return new OK({
+            message: "Device rooms fetched successfully",
+            data: await DeviceService.getAllUniqueRooms()
+        }).send(res);
+    }
 }
 
 export default DeviceController;

@@ -171,6 +171,14 @@ class DeviceService {
         }
         return device;
     }
+
+    static async getAllUniqueRooms() {
+        const rooms = await DeviceModel.getAllUniqueRooms();
+        if (!rooms) {
+            throw new NotFoundError("No devices found");
+        }
+        return rooms;
+    }
 }
 
 export default DeviceService;
