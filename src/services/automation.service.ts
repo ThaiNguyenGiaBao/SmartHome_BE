@@ -107,7 +107,7 @@ class AutomationService {
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
     static async createAutomation(
-        { deviceId, name, low, high, description, action, isActive, category }: AutomationCreate,
+        { deviceId, name, low, high, description, action, is_active, category }: AutomationCreate,
         userId: string
     ) {
         if (!checkUUID(deviceId)) {
@@ -129,7 +129,7 @@ class AutomationService {
             throw new ForbiddenError("Cannot create automation for other user's device");
         }
 
-        const result = await AutomationModel.createAutomation({ deviceId, name, low, high, description, action, isActive, category });
+        const result = await AutomationModel.createAutomation({ deviceId, name, low, high, description, action, is_active, category });
         return result;
     }
 }
