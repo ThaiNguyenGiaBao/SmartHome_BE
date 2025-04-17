@@ -79,6 +79,12 @@ class DeviceService {
         return response.data;
     }
 
+    static async getAllRooms() {
+        const rooms = await DeviceModel.getAllUniqueRooms();
+        console.log("DeviceService::getAllRooms", rooms);
+        return rooms;
+    }
+
     static async updateDeviceStateById(id: string, command: string) {
         if (!checkUUID(id)) {
             throw new BadRequestError("Invalid device id");

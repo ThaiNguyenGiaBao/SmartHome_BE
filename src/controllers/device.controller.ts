@@ -30,7 +30,13 @@ class DeviceController {
         }).send(res);
     }
 
- 
+    static async getAllRooms(req: Request, res: Response) {
+        console.log("DeviceController::getAllRooms");
+        return new OK({
+            message: "Device rooms fetched successfully",
+            data: await DeviceService.getAllRooms()
+        }).send(res);
+    }
 
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static async updateDeviceStateById(req: Request, res: Response) {
