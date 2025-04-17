@@ -17,21 +17,21 @@ class AutomationModel {
     // router.get("/:id", asyncHandler(AutomationController.getAutomationById));
     static getAutomationById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios WHERE id = $1", [id]);
+            const automation = yield initDatabase_1.default.query("SELECT a.* , d.name as device_name, d.type as device_type, d.room as device_room, d.image_url FROM automation_scenarios a join devices d on a.device_id = d.id WHERE a.id = $1", [id]);
             return automation.rows[0];
         });
     }
     // router.get("/user/:userId", asyncHandler(AutomationController.getAutomationByUserId));
     static getAutomationByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const automation = yield initDatabase_1.default.query("select a.* from users u join devices d on u.id = d.user_id join automation_scenarios a on a.device_id = d.id where u.id = $1", [userId]);
+            const automation = yield initDatabase_1.default.query("select a.* , d.name as device_name, d.type as device_type, d.room as device_room, d.image_url from users u join devices d on u.id = d.user_id join automation_scenarios a on a.device_id = d.id where u.id = $1", [userId]);
             return automation.rows;
         });
     }
     // router.get("/device/:deviceId", asyncHandler(AutomationController.getAutomationByDeviceId));
     static getAutomationByDeviceId(deviceId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios a  WHERE device_id = $1", [deviceId]);
+            const automation = yield initDatabase_1.default.query("SELECT a.* , d.name as device_name, d.type as device_type, d.room as device_room, d.image_url  FROM automation_scenarios a join devices d on a.device_id = d.id WHERE d.id = $1", [deviceId]);
             return automation.rows;
         });
     }
@@ -43,7 +43,7 @@ class AutomationModel {
     }
     static getAutomationByCategory(category) {
         return __awaiter(this, void 0, void 0, function* () {
-            const automation = yield initDatabase_1.default.query("SELECT * FROM automation_scenarios WHERE category = $1", [category]);
+            const automation = yield initDatabase_1.default.query("SELECT a.* , d.name as device_name, d.type as device_type, d.room as device_room, d.image_url FROM automation_scenarios WHERE category = $1", [category]);
             return automation.rows;
         });
     }
@@ -68,10 +68,11 @@ class AutomationModel {
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
     static createAutomation(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, action, isActive, category }) {
+        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, action, is_active, category }) {
             const result = yield initDatabase_1.default.query(`INSERT INTO automation_scenarios (device_id, name, low, high, action, is_active,category)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [deviceId, name, low, high, action, isActive, category]);
-            return result.rows[0];
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [deviceId, name, low, high, action, is_active, category]);
+            const response = yield initDatabase_1.default.query("SELECT a.* , d.name as device_name, d.type as device_type, d.room as device_room, d.image_url FROM automation_scenarios a join devices d on a.device_id = d.id WHERE a.id = $1", [result.rows[0].id]);
+            return response.rows[0];
         });
     }
 }

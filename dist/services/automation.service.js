@@ -107,7 +107,7 @@ class AutomationService {
     }
     // router.post("/", asyncHandler(AutomationController.createAutomation));
     static createAutomation(_a, userId_1) {
-        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, description, action, isActive, category }, userId) {
+        return __awaiter(this, arguments, void 0, function* ({ deviceId, name, low, high, description, action, is_active, category }, userId) {
             if (!(0, utils_1.checkUUID)(deviceId)) {
                 throw new errorRespone_1.BadRequestError("Invalid device id");
             }
@@ -124,7 +124,7 @@ class AutomationService {
             if (device.user_id !== userId) {
                 throw new errorRespone_1.ForbiddenError("Cannot create automation for other user's device");
             }
-            const result = yield automation_model_1.default.createAutomation({ deviceId, name, low, high, description, action, isActive, category });
+            const result = yield automation_model_1.default.createAutomation({ deviceId, name, low, high, description, action, is_active, category });
             return result;
         });
     }

@@ -45,6 +45,15 @@ class DeviceController {
             }).send(res);
         });
     }
+    static getAllRooms(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("DeviceController::getAllRooms");
+            return new successResponse_1.OK({
+                message: "Device rooms fetched successfully",
+                data: yield device_service_1.default.getAllRooms()
+            }).send(res);
+        });
+    }
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static updateDeviceStateById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
