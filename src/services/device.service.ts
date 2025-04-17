@@ -112,15 +112,24 @@ class DeviceService {
         }
 
         const deviceList = await DeviceModel.getDeviceByUserId(userId);
-
         // Promise all
         const devicePromises = deviceList.map(async (device: Device) => {
-            device.state = await FeedService.getStatusFeed(device.feed_key);
+            console.log("DeviceService::getDeviceByUserId", device);
+            const res = await FeedService.getStatusFeed(device.feed_key);
+
+            console.log("res", res);
+            device.state = res;
             return device;
         });
-        const deviceListWithState: Device[] = await Promise.all(devicePromises);
 
-        return deviceListWithState;
+        try{
+            const deviceListWithState: Device[] = await Promise.all(devicePromises);
+            return deviceListWithState;
+        }
+        catch (error) {
+            throw new NotFoundError("Device not found");
+        }
+
     }
 
     // router.patch("/update/:id", asyncHandler(DeviceController.updateDevice));
