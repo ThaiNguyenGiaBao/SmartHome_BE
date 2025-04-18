@@ -85,6 +85,13 @@ class DeviceService {
             return response.data;
         });
     }
+    static getAllRooms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const rooms = yield device_model_1.default.getAllUniqueRooms();
+            console.log("DeviceService::getAllRooms", rooms);
+            return rooms;
+        });
+    }
     static updateDeviceStateById(id, command) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, utils_1.checkUUID)(id)) {

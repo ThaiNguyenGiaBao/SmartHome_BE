@@ -14,7 +14,10 @@ router.get("/async", asyncHandler(DeviceController.syncBlocksDatabaseAdafruitIo)
 router.get("/user", asyncHandler(DeviceController.getDeviceByUserId));
 router.get("/allrooms", asyncHandler(DeviceController.getAllUniqueRooms));
 
+router.get("/room", asyncHandler(DeviceController.getAllRooms));
+
 router.get("/:id", asyncHandler(DeviceController.getDeviceById));
+
 
 router.patch("/:id", asyncHandler(DeviceController.updateDevice));
 router.delete("/:id", asyncHandler(DeviceController.deleteDevice));

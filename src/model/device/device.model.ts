@@ -13,6 +13,11 @@ class DeviceModel {
         return device.rows[0];
     }
 
+    static async getAllRooms() {
+        const rooms = await db.query("SELECT DISTINCT room FROM devices");
+        return rooms.rows;
+    }
+
     static async getDeviceByBlockId(id: string) {
         const device = await db.query("SELECT * FROM devices WHERE block_id = $1", [id]);
         return device.rows[0];
@@ -63,7 +68,10 @@ class DeviceModel {
 
     static async getAllUniqueRooms() {
         const result = await db.query("SELECT DISTINCT room FROM devices");
-        console.log("getAllUniqueRooms::", result.rows);
+        result.rows = result.rows.map((row: any) => {
+            return row.room;
+        });
+
         return result.rows;
     }
 }

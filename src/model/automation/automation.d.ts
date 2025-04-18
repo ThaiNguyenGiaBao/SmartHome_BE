@@ -5,7 +5,7 @@ type Automation = {
     low: number; // INT
     high: number; // INT
     action: string; // VARCHAR(100)
-    isActive: boolean; // BOOLEAN, default TRUE
+    is_active: boolean; // BOOLEAN, default TRUE
     createdAt: Date; // TIMESTAMP WITH TIME ZONE
     category: string; // VARCHAR(100), default 'light' or 'smoke'
 };

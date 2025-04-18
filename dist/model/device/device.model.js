@@ -27,6 +27,12 @@ class DeviceModel {
             return device.rows[0];
         });
     }
+    static getAllRooms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const rooms = yield initDatabase_1.default.query("SELECT DISTINCT room FROM devices");
+            return rooms.rows;
+        });
+    }
     static getDeviceByBlockId(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const device = yield initDatabase_1.default.query("SELECT * FROM devices WHERE block_id = $1", [id]);
@@ -82,7 +88,9 @@ class DeviceModel {
     static getAllUniqueRooms() {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield initDatabase_1.default.query("SELECT DISTINCT room FROM devices");
-            console.log("getAllUniqueRooms::", result.rows);
+            result.rows = result.rows.map((row) => {
+                return row.room;
+            });
             return result.rows;
         });
     }
