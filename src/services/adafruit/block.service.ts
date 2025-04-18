@@ -8,7 +8,7 @@ export class BlockService {
     public static username: string = process.env.ADAFRUIT_IO_USERNAME || "";
     public static aioKey: string = process.env.ADAFRUIT_IO_KEY || "";
     private static dashboardId: string = "dashboards";
-    private static dashboard: string = "welcome-dashboard";
+    private static dashboard: string = "welcome-dashboard" ;
 
     static async createBlock(blockData: any): Promise<any> {
         const blockEndpoint = `https://io.adafruit.com/api/v2/${BlockService.username}/${BlockService.dashboardId}/${BlockService.dashboard}/blocks`;
