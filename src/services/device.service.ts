@@ -118,23 +118,21 @@ class DeviceService {
         }
 
         const deviceList = await DeviceModel.getDeviceByUserId(userId);
-        // Promise all
-        const devicePromises = deviceList.map(async (device: Device) => {
-            console.log("DeviceService::getDeviceByUserId", device);
-            const res = await FeedService.getStatusFeed(device.feed_key);
-
-            console.log("res", res);
-            device.state = res;
-            return device;
-        });
-
-        try{
-            const deviceListWithState: Device[] = await Promise.all(devicePromises);
-            return deviceListWithState;
+        const deviceListWithState: Device[] = [];
+    
+        for (const device of deviceList) {
+            try {
+                const state = await FeedService.getStatusFeed(device.feed_key);
+                device.state = state;
+                deviceListWithState.push(device);
+            } catch (error) {
+                console.error(`Error fetching state for device ${device.id}, named: ${device.name}`);
+                device.state = "unknown";
+                deviceListWithState.push(device);
+            }
         }
-        catch (error) {
-            throw new NotFoundError("Device not found");
-        }
+        
+        return deviceListWithState;
 
     }
 
