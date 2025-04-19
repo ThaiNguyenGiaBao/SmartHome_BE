@@ -54,6 +54,15 @@ class DeviceController {
             }).send(res);
         });
     }
+    static getAllCategory(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("DeviceController::getAllCategory");
+            return new successResponse_1.OK({
+                message: "Device categories fetched successfully",
+                data: yield device_service_1.default.getAllCategory()
+            }).send(res);
+        });
+    }
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static updateDeviceStateById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {

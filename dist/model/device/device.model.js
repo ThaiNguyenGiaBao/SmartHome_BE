@@ -94,5 +94,14 @@ class DeviceModel {
             return result.rows;
         });
     }
+    static getAllUniqueCategory() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield initDatabase_1.default.query("SELECT DISTINCT category FROM devices where category  != '' ");
+            result.rows = result.rows.map((row) => {
+                return row.category;
+            });
+            return result.rows;
+        });
+    }
 }
 exports.default = DeviceModel;

@@ -92,6 +92,13 @@ class DeviceService {
             return rooms;
         });
     }
+    static getAllCategory() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const categories = yield device_model_1.default.getAllUniqueCategory();
+            console.log("DeviceService::getAllCategory", categories);
+            return categories;
+        });
+    }
     static updateDeviceStateById(id, command) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!(0, utils_1.checkUUID)(id)) {
@@ -124,12 +131,19 @@ class DeviceService {
                 throw new errorRespone_1.BadRequestError("Invalid user id");
             }
             const deviceList = yield device_model_1.default.getDeviceByUserId(userId);
-            // Promise all
-            const devicePromises = deviceList.map((device) => __awaiter(this, void 0, void 0, function* () {
-                device.state = yield feed_service_1.FeedService.getStatusFeed(device.feed_key);
-                return device;
-            }));
-            const deviceListWithState = yield Promise.all(devicePromises);
+            const deviceListWithState = [];
+            for (const device of deviceList) {
+                try {
+                    const state = yield feed_service_1.FeedService.getStatusFeed(device.feed_key);
+                    device.state = state;
+                    deviceListWithState.push(device);
+                }
+                catch (error) {
+                    console.error(`Error fetching state for device ${device.id}, named: ${device.name}`);
+                    device.state = "unknown";
+                    deviceListWithState.push(device);
+                }
+            }
             return deviceListWithState;
         });
     }
