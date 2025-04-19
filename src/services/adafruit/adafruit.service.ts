@@ -201,11 +201,11 @@ export class AdafruitService extends EventEmitter {
                     // TODO: LOG ONLY IF THE DEVICE TYPE IS "gauge"
                     if (!isNaN(parseInt(latest, 10)) && !["0", "1"].includes(latest)) {
                         const EnvLogService = require("../services/envLog.service").default;
-
-                        // await EnvLogService.createLog({
-                        //     deviceId: deviceId.id,
-                        //     value: parseInt(latest, 10)
-                        // });
+                        
+                    await EnvLogService.createLog({
+                        deviceId: deviceId.id,
+                        value: parseInt(latest, 10)
+                    });
                     }
                 }
                 console.log("Data pulled successfully from all feeds.");
