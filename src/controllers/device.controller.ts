@@ -38,6 +38,14 @@ class DeviceController {
         }).send(res);
     }
 
+    static async getAllCategory(req: Request, res: Response) {
+        console.log("DeviceController::getAllCategory");
+        return new OK({
+            message: "Device categories fetched successfully",
+            data: await DeviceService.getAllCategory()
+        }).send(res);
+    }
+
     // router.post("/control/:id?command", asyncHandler(DeviceController.updateDeviceStateById));
     static async updateDeviceStateById(req: Request, res: Response) {
         console.log("DeviceController::updateDeviceStateById", req.params.id, req.query.command);

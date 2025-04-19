@@ -15,9 +15,9 @@ router.get("/user", asyncHandler(DeviceController.getDeviceByUserId));
 router.get("/allrooms", asyncHandler(DeviceController.getAllUniqueRooms));
 
 router.get("/room", asyncHandler(DeviceController.getAllRooms));
+router.get("/category", asyncHandler(DeviceController.getAllCategory));
 
 router.get("/:id", asyncHandler(DeviceController.getDeviceById));
-
 
 router.patch("/:id", asyncHandler(DeviceController.updateDevice));
 router.delete("/:id", asyncHandler(DeviceController.deleteDevice));

@@ -85,6 +85,12 @@ class DeviceService {
         return rooms;
     }
 
+    static async getAllCategory() {
+        const categories = await DeviceModel.getAllUniqueCategory();
+        console.log("DeviceService::getAllCategory", categories);
+        return categories;
+    }
+
     static async updateDeviceStateById(id: string, command: string) {
         if (!checkUUID(id)) {
             throw new BadRequestError("Invalid device id");

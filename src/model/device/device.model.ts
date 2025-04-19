@@ -74,6 +74,14 @@ class DeviceModel {
 
         return result.rows;
     }
+    static async getAllUniqueCategory() {
+        const result = await db.query("SELECT DISTINCT category FROM devices where category  != '' ");
+        result.rows = result.rows.map((row: any) => {
+            return row.category;
+        });
+
+        return result.rows;
+    }
 }
 
 export default DeviceModel;
